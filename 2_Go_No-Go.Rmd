@@ -1,0 +1,313 @@
+---
+title: "Go/No-Go Task"
+output: 
+  html_document
+
+---
+
+<!-- Set general settings -->
+
+```{r setup, include = FALSE}
+
+# Set general settings for markdown file
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  comment = "",
+  results = "hold"
+)
+
+
+# Clear environment
+rm(list = ls())
+
+
+# Load packages
+library(dplyr)      # for data manipulation
+library(knitr)      # for integrating computing and reporting in markdown
+library(pastecs)    # for descriptive statistics
+library(lme4)       # for (G)LMMs
+library(lmerTest)   # for LMM p values (Satterthwaite's method for approximating dfs for the t and F tests)
+library(MASS)       # for contrast definition
+library(sjPlot)     # for tab_model function to display (G)LMM results
+
+
+# Load functions
+source("./functions/summarySEwithinO.R")  # Function provided by R-cookbook: http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
+source("./functions/my_table_template.R") # Function to create table template
+
+
+# Turn off scientific notation
+options(scipen = 999)
+```
+<br><br>
+
+## Data Cleaning
+***
+```{r load-and-clean-data}
+
+# Load data
+load(file = "./data/Single_Trial_Data.rda")
+
+
+# For go/no-go RT analysis, exclude inhibited responses, missing gng responses, gng responses with wrong key, and RT outliers
+single_trial_data_gng_rt <- single_trial_data %>%
+  dplyr::filter(
+      gng_response_type != "IR" &  
+      gng_response_type != "miss" &
+      gng_response_type != "wrong_key" &
+      (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &
+      (is.na(word_rt_outlier) | word_rt_outlier == FALSE)
+  ) # (11028 of 15480 trials left)
+
+
+# Make categorical variables factors
+single_trial_data_gng_rt$gng_response_type <- factor(single_trial_data_gng_rt$gng_response_type, levels = c("SH", "FH", "FA"))
+single_trial_data_gng_rt$participant_id    <- factor(single_trial_data_gng_rt$participant_id)
+```
+
+Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant's median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of RT in the go/no-go task, trials with correctly inhibited responses were not considered. For details on the percentage of excluded trials, please see section "Data Cleaning" in the tab "Word Categorization Task".
+<br><br><br>
+
+## Descriptive Statistics
+***
+### Means and CIs
+
+This table corresponds to Table S6 in the Supplemental Material.  
+
+```{r descriptive-statistics-table}
+
+# Calculate descriptive statistics for RT per condition
+descriptive_statistics_rt <- summarySEwithinO(
+  data          = single_trial_data_gng_rt,
+  measurevar    = "gng_rt",
+  withinvars    = "gng_response_type",
+  idvar         = "participant_id",
+  conf.interval = .95
+) 
+
+
+# Prepare calculation of descriptive statistics for proportion of response types (based on all trials)
+descriptive_statistics_proportion <- single_trial_data %>%
+  group_by(participant_id) %>%
+  dplyr::summarize(
+    gng_SH         = sum(gng_response_type == "SH") / length(participant_id) * 100,
+    gng_FH         = sum(gng_response_type == "FH") / length(participant_id) * 100,
+    gng_FA         = sum(gng_response_type == "FA") / length(participant_id) * 100,
+    gng_IR         = sum(gng_response_type == "IR") / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == "miss") / length(participant_id) * 100,
+    gng_wrong_key  = sum(gng_response_type == "wrong_key") / length(participant_id) * 100,
+  ) 
+
+
+# Calculate descriptive statistics for proportion (exclude first column containing participant ID) 
+descriptive_statistics_proportion <- as.data.frame(t(stat.desc(descriptive_statistics_proportion[,-1]))) %>%
+  # Select relevant columns
+  dplyr::select(c("mean", "CI.mean.0.95")) %>%
+  # Create response type column for subsequent merging
+  dplyr::mutate(
+    gng_response_type = c("SH", "FH", "FA", "IR", "Missing response", "Wrong key response")
+    )
+
+
+# Make a nice merged table for display
+descriptive_statistics <- full_join(descriptive_statistics_rt, descriptive_statistics_proportion,
+  by = "gng_response_type"
+) %>%
+  # Round numeric values to two decimals
+  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
+  # Format confidence interval column
+  dplyr::mutate(
+    ci_rt         = paste0("[", gng_rt - ci,           ", ", gng_rt + ci, "]"),
+    ci_proportion = paste0("[", mean   - CI.mean.0.95, ", ", mean   + CI.mean.0.95, "]")
+  ) %>%
+  # Select columns to be displayed
+  dplyr::select(c("gng_response_type", "gng_rt", "ci_rt", "mean", "ci_proportion"))
+
+
+# Display descriptive statistics for RT and proportion (and rearrange order of rows)
+my_table_template(descriptive_statistics[c(3, 2, 1, 4,5,6), ],
+  caption = "Go/No-Go Task Behavioral Performance",
+  col_names = c("Response type", "M", "95% CI", "M", "95% CI"),
+  header_above_config = c(" " = 1, "RT (ms)" = 2, "Proportion (%)" = 2),
+  footnote_config = c(general = "RT confidence intervals are adjusted for within-participant designs as described by Morey (2008).")
+)
+```
+<br>
+
+### Number of false alarms
+
+The paradigm was effective in fostering a sufficient number of false alarms.
+
+```{r error-number}
+
+# Calculate number of false alarms (based on all trials)
+FAs <- single_trial_data %>%
+  dplyr::filter(gng_response_type == "FA") %>%
+  group_by(participant_id) %>%
+  dplyr::summarize(
+    number_FAs = n()
+  )
+
+
+FA_mean <- round(mean(FAs$number_FAs), digits = 2)
+FA_sd   <- round(sd(FAs$number_FAs),   digits = 2)
+```
+
+Number of false alarms: *M* = `r FA_mean`, *SD* = `r FA_sd`
+<br><br><br>
+
+## LMM Analysis
+***
+To evaluate RT differences between response types in the go/no-go task, we fitted a LMM on the inverse-transformed RT with response type (slow hit, fast hit, false alarm) as fixed effect and by-participant random effects. LMM analysis was conducted on inverse-transformed RT values to meet the assumption of normally distributed residuals. 
+For details on contrast coding and the procedure used to specify the random-effects structure, please see section "(G)LMM analyses" in the tab "Word Categorization Task".
+<br><br>
+
+### RT
+
+#### Run first model 
+
+As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
+<br><br>
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the paper and Table S7 in the Supplemental Material.  
+
+```{r RT-LMM-final-model-1}
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_gng_rt$gng_response_type) <- contr.sdif(3)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type, single_trial_data_gng_rt)
+
+
+# Attach the model matrix (3 columns) to the dataframe
+single_trial_data_gng_rt[, (ncol(single_trial_data_gng_rt) + 1):(ncol(single_trial_data_gng_rt) + 3)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_gng_rt)[(ncol(single_trial_data_gng_rt) - 2):ncol(single_trial_data_gng_rt)] <- c(
+  "Grand Mean", "FH_SH", "FA_FH"
+  )
+
+
+# Run model with maximal random-effects structure
+LMM_gng_rt_1 <- lmer(gng_rt_inverse ~ gng_response_type +
+  (1 + FH_SH + FA_FH | participant_id), 
+data = single_trial_data_gng_rt,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_gng_rt_1) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_gng_rt_1)) # All terms explain variance
+
+
+# Prepare labels for LMM table
+labels <- c(
+  "(Intercept)"          = "Intercept",
+  "gng_response_type2-1" = "FH - SH",
+  "gng_response_type3-2" = "FA - FH"
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_gng_rt_1,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_gng_rt_1), digits = 2, comp = "Std.Dev.")
+```
+RTs were longer for slow hits compared to fast hits. RTs for fast hits and false alarms did not differ significantly. 
+<br><br><br>
+
+#### Run second model 
+
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the paper and Table S7 in the Supplemental Material. 
+
+```{r RT-LMM-final-model-2}
+
+# Reorder factor levels
+single_trial_data_gng_rt$gng_response_type <- factor(single_trial_data_gng_rt$gng_response_type, levels=c("SH","FA","FH")) 
+
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_gng_rt$gng_response_type) <- contr.sdif(3)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type, single_trial_data_gng_rt)
+
+
+# Attach the model matrix (3 columns) to the dataframe
+single_trial_data_gng_rt[, (ncol(single_trial_data_gng_rt) + 1):(ncol(single_trial_data_gng_rt) + 3)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_gng_rt)[(ncol(single_trial_data_gng_rt) - 2):ncol(single_trial_data_gng_rt)] <- c(
+  "Grand Mean", "FA_SH", "FH_FA"
+  )
+
+
+# Run model with maximal random-effects structure
+LMM_gng_rt_2 <- lmer(gng_rt_inverse ~ gng_response_type +
+  (1 + FA_SH + FH_FA | participant_id), 
+data = single_trial_data_gng_rt,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_gng_rt_2) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_gng_rt_2)) # All terms explain variance
+
+
+# Prepare labels for LMM table
+labels <- c(
+  "(Intercept)"          = "Intercept",
+  "gng_response_type2-1" = "FA - SH",
+  "gng_response_type3-2" = "FH - FA"
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_gng_rt_2,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_gng_rt_2), digits = 2, comp = "Std.Dev.")
+```
+RTs were longer for slow hits compared to false alarms. 
+<br><br><br>
+
+## References
+***
+Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology, 49*(4), 764-766. https://doi.org/10.1016/j.jesp.2013.03.013 <br><br> 
+Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). *Tutorials in Quantitative Methods for Psychology, 4*(2), 61-64. https://doi.org/10.20982/tqmp.04.2.p061 <br><br>
+<br>
+
+## Session Info
+***
+```{r session-info}
+
+sessionInfo()
+```

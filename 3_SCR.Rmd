@@ -1,0 +1,771 @@
+---
+title: "Skin Conductance Response"
+output: 
+  html_document
+
+---
+
+<!-- Set general settings -->
+
+```{r setup, include = FALSE}
+
+# Set general settings for markdown file
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  comment = "",
+  results = "hold"
+)
+
+
+# Clear environment
+rm(list = ls())
+
+
+# Load packages
+library(dplyr)      # for data manipulation
+library(knitr)      # for integrating computing and reporting in markdown
+library(ggplot2)    # for plotting
+library(papaja)     # for using APA style in plot (theme_apa) 
+library(ggsignif)   # for adding asterisks in plot
+library(lme4)       # for (G)LMMs
+library(lmerTest)   # for LMM p values (Satterthwaite's method for approximating dfs for the t and F tests)
+library(MASS)       # for contrast definition
+library(sjPlot)     # for tab_model function to display (G)LMM results
+
+
+# Load functions
+source("./functions/summarySEwithinO.R")  # Function provided by R-cookbook: http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
+source("./functions/my_table_template.R") # Function to create table template
+
+
+# Turn off scientific notation
+options(scipen = 999)
+
+
+# Set figure theme 
+my_figure_theme <- theme_apa(base_size = 11) +
+  theme(legend.position = "top", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
+
+
+# prepare labels for LMM tables
+labels <- c(
+  "(Intercept)"                               = "Intercept",
+  "gng_response_type2-1"                      = "FH - SH",
+  "gng_response_type3-2"                      = "FA - FH",
+  "word_valence2-1"                           = "Pos - Neg",
+  "gng_response_type2-1:word_valence2-1"      = "FH - SH x Pos - Neg",
+  "gng_response_type3-2:word_valence2-1"      = "FA - FH x Pos - Neg",
+  "gng_response_typeSH:word_valence2-1"       = "SH: Pos - Neg",
+  "gng_response_typeFH:word_valence2-1"       = "FH: Pos - Neg",
+  "gng_response_typeFA:word_valence2-1"       = "FA: Pos - Neg",
+  "iscr_gng_resp_sqrt_z"                      = "SCR",
+  "word_valence2-1:iscr_gng_resp_sqrt_z"      = "Pos - Neg x SCR",
+  "gng_response_type2-1:iscr_gng_resp_sqrt_z" = "FH - SH x SCR", 
+  "gng_response_type3-2:iscr_gng_resp_sqrt_z" = "FA - FH x SCR",
+  "gng_response_typeSH:iscr_gng_resp_sqrt_z"  = "SH: SCR",
+  "gng_response_typeFH:iscr_gng_resp_sqrt_z"  = "FH: SCR",
+  "gng_response_typeFA:iscr_gng_resp_sqrt_z"  = "FA: SCR",
+  "gng_response_type2-1:word_valence2-1:iscr_gng_resp_sqrt_z" = "FH - SH x Pos - Neg x SCR", 
+  "gng_response_type3-2:word_valence2-1:iscr_gng_resp_sqrt_z" = "FA - FH x Pos - Neg x SCR",
+  "gng_response_typeSH:word_valence2-1:iscr_gng_resp_sqrt_z"  = "SH: Pos - Neg x SCR",      
+  "gng_response_typeFH:word_valence2-1:iscr_gng_resp_sqrt_z"  = "FH: Pos - Neg x SCR",
+  "gng_response_typeFA:word_valence2-1:iscr_gng_resp_sqrt_z"  = "FA: Pos - Neg x SCR"
+  )
+```
+<br><br>
+
+## Data Cleaning
+***
+```{r load-and-clean-data}
+
+# Load data
+load(file = "./data/Single_Trial_Data.rda")
+
+
+# Before trial exclusion, create variable indicating color of fixation cross (needed for control analysis)
+# Trial after each fast hit starts with white fixation cross; all other trials with red cross
+single_trial_data <- single_trial_data %>%
+  mutate(
+    fixation_cross_white = (lag(gng_response_type) == "FH")
+  )
+
+
+# First trial of each block also starts with white fixation cross
+single_trial_data[single_trial_data$trial == 1   | single_trial_data$trial == 29  | 
+                  single_trial_data$trial == 101 | single_trial_data$trial == 173 | 
+                  single_trial_data$trial == 201 | single_trial_data$trial == 273 | 
+                  single_trial_data$trial == 345 | single_trial_data$trial == 373 | 
+                  single_trial_data$trial == 445,]$fixation_cross_white <- TRUE
+
+
+# For SCR analysis, exclude exclude inhibited responses, missing responses, responses with wrong key, trials with    
+# incorrect word categorization, RT outliers, and trials that were followed or preceded by trials with incorrect responses
+single_trial_data_scr <- single_trial_data %>%
+  dplyr::filter(
+      gng_response_type != "IR" &  
+      gng_response_type != "miss" &
+      gng_response_type != "wrong_key" &
+      word_accuracy     != "incorrect" &
+      word_accuracy     != "miss" &
+      word_accuracy     != "wrong_key" &
+      (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &
+      (is.na(word_rt_outlier) | word_rt_outlier == FALSE) &
+      trial_followed_or_preceded_by_any_incorr_resp == FALSE &
+      !is.na(iscr_gng_resp)  
+  ) # (7139 of 15480 trials left)
+
+
+# Calculate standardized SCR and standardized square root transformed SCR
+single_trial_data_scr <- single_trial_data_scr %>%
+  group_by(participant_id) %>%
+    dplyr::mutate(
+      iscr_gng_resp_sqrt   = sqrt(iscr_gng_resp),
+      iscr_gng_resp_z      = scale(iscr_gng_resp, center = TRUE, scale = TRUE),
+      iscr_gng_resp_sqrt_z = scale(sqrt(iscr_gng_resp), center = TRUE, scale = TRUE)
+    )
+
+
+# Make categorical variables factors
+single_trial_data_scr$gng_response_type     <- factor(single_trial_data_scr$gng_response_type, levels = c("SH", "FH", "FA"))
+single_trial_data_scr$word_valence          <- factor(single_trial_data_scr$word_valence)
+single_trial_data_scr$participant_id        <- factor(single_trial_data_scr$participant_id)
+single_trial_data_scr$word                  <- factor(single_trial_data_scr$word)
+single_trial_data_scr$fixation_cross_white  <- factor(single_trial_data_scr$fixation_cross_white, levels = c(TRUE, FALSE))
+```
+
+Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant's median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. For analyses containing SCR as dependent or independent variable, we included only trials with correct word categorization that were neither followed nor preceded by trials in which incorrect responses were made. Moreover, only slow hit, fast hit, and false alarm trials were included in SCR analyses. For details on the percentage of excluded trials, please see section "Data Cleaning" in the tab "Word Categorization Task".
+<br><br><br>
+
+## Descriptive Statistics
+***
+### Means and CIs
+
+This table corresponds to Table S4 in the Supplemental Material.  
+
+```{r descriptive-statistics-table}
+
+# Calculate descriptive statistics for standardized SCR per condition
+descriptive_statistics_scr_z <- summarySEwithinO(
+  data          = single_trial_data_scr,
+  measurevar    = "iscr_gng_resp_z",
+  withinvars    = "gng_response_type",
+  idvar         = "participant_id",
+  conf.interval = .95
+) %>%
+  # Round numeric values to two decimals
+  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
+  # Format confidence interval column
+  dplyr::mutate(
+    ci_scr = paste0("[", iscr_gng_resp_z - ci, ", ", iscr_gng_resp_z + ci, "]")
+  ) %>%
+  # Select columns to be displayed
+  dplyr::select(c("gng_response_type", "iscr_gng_resp_z", "ci_scr", "ci"))
+
+
+# Display descriptive statistics for standardized SCR (and rearrange order of rows)
+my_table_template(descriptive_statistics_scr_z[c(3, 2, 1), c(1:3)],
+  caption = "Standardized SCR (µS)",
+  col_names = c("Response type", "M", "95% CI"),
+  footnote_config = c(general = "Confidence intervals are adjusted for within-participant designs as described by Morey (2008).")
+)
+```
+<br>
+
+### Plot
+
+This figure corresponds to Figure 3 in the paper. 
+
+```{r descriptive-statistics-plot, fig.cap = "Note. Standardized SCR is shown as a function of response type in the go/no-go task. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)"}
+
+# Create plot standardized SCR
+plot_scr <- ggplot(descriptive_statistics_scr_z, 
+                  aes(x = gng_response_type, y = iscr_gng_resp_z)) +
+  geom_bar(stat = "identity", position = position_dodge(), colour = "black", size = 0.25, fill = "#8ea6b4") +
+  geom_errorbar(aes(ymax = iscr_gng_resp_z + ci, ymin = iscr_gng_resp_z - ci), 
+                position = position_dodge(width = 0.9), width = 0.2, size = 0.3) +
+  my_figure_theme +
+  labs(x = "Response Type", y = "Standardized SCR (µS)") +
+  scale_y_continuous(breaks = seq(-0.2, 0.5, 0.1), limits = c(-0.2,0.5), expand = c(0,0)) +
+  geom_hline(yintercept = 0, size = 0.25) +
+  geom_signif(
+    y_position = c(0.48,0.43), xmin = c(1,2), xmax = c(3,3),
+    annotation = c("***","**"), tip_length = 0.01, vjust = 0.5, textsize = 4, size = 0.3
+  )
+
+
+# Save plot
+# ggsave("figure_scr.tiff",width = 10, height = 7.5 , units = "cm", dpi=600, compression = "lzw")
+
+
+# Display plot
+plot_scr
+```
+<br>
+
+### Physiological nonresponders 
+
+Participants exhibiting no measurable SCR (i.e., ISCR scores of zero) in more than 75% of all trials were classified as physiological nonresponders. All participants were below this threshold, so no participants were excluded from SCR analyses. 
+
+```{r nonresponders}
+
+# Calculate percentage of zero responses (based on all trials)
+zero_responses <- single_trial_data[!is.na(single_trial_data$iscr_gng_resp), ] %>%
+  group_by(participant_id) %>%
+  dplyr::summarize(
+    percentage_zero_responses = length(participant_id[iscr_gng_resp == 0]) / length(participant_id) * 100
+  )
+
+
+percentage_zero_responses_mean <- round(mean(zero_responses$percentage_zero_responses), digits = 2)
+percentage_zero_responses_sd   <- round(sd(zero_responses$percentage_zero_responses),   digits = 2)
+percentage_zero_responses_min  <- round(min(zero_responses$percentage_zero_responses),  digits = 2)
+percentage_zero_responses_max  <- round(max(zero_responses$percentage_zero_responses),  digits = 2)
+```
+
+Percentage of zero responses: *M* = `r percentage_zero_responses_mean`%, *SD* = `r percentage_zero_responses_sd`%, range = `r percentage_zero_responses_min`–`r percentage_zero_responses_max`%
+<br><br><br>
+
+## LMM Analysis
+***
+To investigate whether the response type in the go/no-go task was predictive of SCR, we regressed response type (slow hit, fast hit, false alarm) on the square root-transformed SCR while accounting for participant-specific random effects. ISCR values were square root transformed prior to statistical analyses to reduce positive skew. 
+For details on contrast coding and the procedure used to specify the random-effects structure, please see section "(G)LMM analyses" in the tab "Word Categorization Task".
+<br><br>
+
+### SCR
+
+#### Run first model 
+
+As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
+<br><br>
+This table corresponds to the results section "Skin Conductance Response" in the paper and Table S5 in the Supplemental Material.  
+
+```{r SCR-LMM-final-model-1}
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_scr$gng_response_type) <- contr.sdif(3)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type, single_trial_data_scr)
+
+
+# Attach the model matrix (3 columns) to the dataframe
+single_trial_data_scr[, (ncol(single_trial_data_scr) + 1):(ncol(single_trial_data_scr) + 3)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_scr)[(ncol(single_trial_data_scr) - 2):ncol(single_trial_data_scr)] <- c(
+  "Grand Mean", "FH_SH", "FA_FH"
+  )
+
+
+# Run model with maximal random-effects structure
+LMM_scr_1 <- lmer(iscr_gng_resp_sqrt ~ gng_response_type +
+  (1 + FH_SH + FA_FH | participant_id), 
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_1) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_1)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_1,
+  dv.labels = "SCR", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_1), digits = 2, comp = "Std.Dev.")
+```
+Participants exhibited a higher SCR following false alarms than following fast hits. A statistical trend was observed for fast hits being related to a higher SCR compared to slow hits. 
+<br><br><br>
+
+#### Run second model 
+
+This table corresponds to the results section "Skin Conductance Response" in the paper and Table S5 in the Supplemental Material.  
+
+```{r SCR-LMM-final-model-2}
+
+# Reorder factor levels
+single_trial_data_scr$gng_response_type <- factor(single_trial_data_scr$gng_response_type, levels=c("SH","FA","FH")) 
+
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_scr$gng_response_type) <- contr.sdif(3)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type, single_trial_data_scr)
+
+
+# Attach the model matrix (3 columns) to the dataframe
+single_trial_data_scr[, (ncol(single_trial_data_scr) + 1):(ncol(single_trial_data_scr) + 3)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_scr)[(ncol(single_trial_data_scr) - 2):ncol(single_trial_data_scr)] <- c(
+  "Grand Mean", "FA_SH", "FH_FA"
+  )
+
+
+# Run model with maximal random-effects structure
+LMM_scr_2 <- lmer(iscr_gng_resp_sqrt ~ gng_response_type +
+  (1 + FA_SH + FH_FA | participant_id), 
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_2) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_2)) # All terms explain variance
+
+
+# Prepare labels for LMM table
+labels2 <- c(
+  "(Intercept)"          = "Intercept",
+  "gng_response_type2-1" = "FA - SH",
+  "gng_response_type3-2" = "FH - FA"
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_2,
+  dv.labels = "SCR", pred.labels = labels2, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_2), digits = 2, comp = "Std.Dev.")
+```
+Participants exhibited a higher SCR following false alarms than following slow hits. 
+<br><br><br>
+
+### SCR - affective priming
+
+To test the association between autonomic arousal and affective priming effect, we included the square root-transformed and z-standardized SCR as continuous predictor in the LMM used to analyze word categorization RT. The analysis was comparable to the LMM on word categorization RT, except for the specified levels of the fixed factor response type (slow hit, fast hit, false alarm, but not inhibited response) and the reduced number of observations entering the analysis due to the trial selection criteria for SCR analyses. 
+
+```{r SCR-priming-LMM-contrast-coding}
+
+# Reorder factor levels again
+single_trial_data_scr$gng_response_type <- factor(single_trial_data_scr$gng_response_type, levels=c("SH","FH","FA")) 
+
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_scr$gng_response_type) <- contr.sdif(3)
+contrasts(single_trial_data_scr$word_valence)      <- contr.sdif(2)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type * word_valence, single_trial_data_scr)
+
+
+# Attach the model matrix (6 columns) to the dataframe
+single_trial_data_scr[, (ncol(single_trial_data_scr) + 1):(ncol(single_trial_data_scr) + 6)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_scr)[(ncol(single_trial_data_scr) - 5):ncol(single_trial_data_scr)] <- c(
+  "Grand Mean", "FH_SH", "FA_FH", "pos_neg", "FH_SH:pos_neg", "FA_FH:pos_neg"
+  )
+```
+<br>
+
+#### Model specification
+
+```{r SCR-priming-LMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+LMM_scr_priming_max <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + iscr_gng_resp_sqrt_z +
+       FH_SH:iscr_gng_resp_sqrt_z + FA_FH:iscr_gng_resp_sqrt_z + pos_neg:iscr_gng_resp_sqrt_z + 
+       FH_SH:pos_neg:iscr_gng_resp_sqrt_z + FA_FH:pos_neg:iscr_gng_resp_sqrt_z | participant_id) +
+  (1 + FH_SH + FA_FH + iscr_gng_resp_sqrt_z + FH_SH:iscr_gng_resp_sqrt_z + FA_FH:iscr_gng_resp_sqrt_z | word),
+data = single_trial_data_scr,
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_priming_max) # Singular fit
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+LMM_scr_priming_red1 <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + iscr_gng_resp_sqrt_z +
+       FH_SH:iscr_gng_resp_sqrt_z + FA_FH:iscr_gng_resp_sqrt_z + pos_neg:iscr_gng_resp_sqrt_z + 
+       FH_SH:pos_neg:iscr_gng_resp_sqrt_z + FA_FH:pos_neg:iscr_gng_resp_sqrt_z || participant_id) +
+  (1 + FH_SH + FA_FH + iscr_gng_resp_sqrt_z + FH_SH:iscr_gng_resp_sqrt_z + FA_FH:iscr_gng_resp_sqrt_z || word),
+data = single_trial_data_scr,
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_priming_red1) # Singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(LMM_scr_priming_red1)) # For participant there are five terms that do not explain variance (< 0.5%), for word stimuli two terms
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(LMM_scr_priming_red1), comp = "Variance") # They are all interaction terms involving the factor SCR
+```
+As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. Random effects explaining zero variance (all interaction terms involving the factor SCR) were removed to prevent overparametrization. 
+<br><br><br>
+
+#### Run final model
+
+This table corresponds to Table 3 in the paper. 
+
+```{r SCR-priming-LMM-final-model, cache = TRUE}
+
+#### 3) Run final model without random terms explaining zero variance (i.e., remove all interaction terms involving the factor SCR)
+LMM_scr_priming_final <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + iscr_gng_resp_sqrt_z || participant_id) +
+  (1 + FH_SH + FA_FH + iscr_gng_resp_sqrt_z || word),
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_priming_final) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_priming_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_priming_final,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite", 
+  order.terms = c(1,2,3,4,6,7,5,10,8,9,11,12)
+) 
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_priming_final), digits = 1, comp = "Std.Dev.")
+```
+This analysis yielded the same pattern of results for all main and interaction effects of response type and word valence as previously reported. Contrary to our predictions, we observed no relation between priming effect and SCR, as indicated by the nonsignificant three-way interactions between response type, word valence, and SCR.
+The analysis revealed a statistical trend for a main effect of SCR in the prediction of word categorization RT that was qualified by a significant interaction with response type (contrast false alarm − fast hit). 
+<br><br><br>
+
+#### Follow up interaction
+
+We followed up this interaction by reparametrizing the fixed-effects part of the model with the effect of word valence and SCR and their interaction nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
+<br><br>
+This table corresponds to Table 3 in the paper.  
+
+```{r SCR-priming-LMM-nested-model, cache = TRUE}
+
+#### 4) Run model with the effect of word valence * scr nested within each response type
+LMM_scr_priming_nested <- lmer(word_rt_inverse ~ gng_response_type / (word_valence * iscr_gng_resp_sqrt_z) +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + iscr_gng_resp_sqrt_z || participant_id) +
+  (1 + FH_SH + FA_FH + iscr_gng_resp_sqrt_z || word),
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Display results (fixed effects) - but only show follow-up for interactions that were significant
+tab_model(LMM_scr_priming_nested,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite", 
+  rm.terms = c(
+    "gng_response_typeSH:word_valence2-1:iscr_gng_resp_sqrt_z",
+    "gng_response_typeFH:word_valence2-1:iscr_gng_resp_sqrt_z",
+    "gng_response_typeFA:word_valence2-1:iscr_gng_resp_sqrt_z"
+  )
+)
+```
+<br>
+Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. 
+<br><br><br>
+
+#### Plot PES - SCR Finding
+<br>
+The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. 
+<br><br>
+
+##### Model on inverse RTs (original)
+
+```{r plot-pes-scr-original, cache = TRUE, fig.width = 4, fig.cap = "Error bars indicate 95% confidence intervals."}
+
+# Original LMM doesn't work with plot_model: plot_model does not like interactions in random structure
+# Thus, I have to delete double bar syntax (model does still converge, is not singular)
+# Also: respecify model to have factors as fixed effects, not contrasts: needed to plot all levels of a factor, not only a specific contrast
+LMM_scr_priming_plot <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
+                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
+                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
+                               data = single_trial_data_scr,
+                               REML = TRUE,
+                               control = lmerControl(optimizer = "bobyqa")
+)
+
+
+plot_model(LMM_scr_priming_plot, type = "pred", terms = c("iscr_gng_resp_sqrt_z", "gng_response_type"), legend.title = "Response Type") + 
+  labs(title = NULL, x = "Standardized square root-transformed SCR (µS)", y = "Predicted values of inverse RT (-1000/RT in ms)") +
+  theme_apa(base_size = 11) +
+  theme(legend.position = "bottom", axis.title.y = element_text(vjust = -0.5)) +
+  scale_y_continuous(breaks=seq(-2, -1.3, 0.1), limits = c(-2, -1.3), expand = c(0,0)) +
+  scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))
+
+
+# ggsave("figure_scr_pes.tiff",width = 11, height = 13 , units = "cm", dpi=600, compression = "lzw")
+
+# Possibility 2: specify model as LMM_scr_priming_final (but specify factors as fixed effects, leave contrasts as random effects) but delete interactions from random structure (gives almost same result, a bit narrower CIs, but model results are more different to original model)
+
+# Possibility 3: I could specify LMM_scr_priming_plot with raw values to see how the plot would like on the raw RT scale (other back-transformation of estimates is not possible; only predictors can be back-transformed: https://github.com/strengejacke/sjPlot/issues/544)
+```
+<br><br>
+
+##### Model on raw RTs
+
+This is just to see how the plot would like on the raw RT scale. The model is only approximately comparable to the original one (as it models the raw RT values, not the inverse-transformed values). For reporting, the plot based on the original model should be used.
+
+```{r plot-pes-scr-raw, cache = TRUE, fig.width = 4}
+
+# I could plot LMM with raw values, other back transformation of estimates is not possible (only predictors can be backtransformed)
+LMM_scr_priming_plot_raw <- lmer(word_rt ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
+                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
+                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
+                               data = single_trial_data_scr,
+                               REML = TRUE,
+                               control = lmerControl(optimizer = "bobyqa")
+)
+
+plot_model(LMM_scr_priming_plot_raw, type = "pred", terms = c("iscr_gng_resp_sqrt_z", "gng_response_type"), legend.title = "Response Type") + 
+  labs(title = NULL, x = "Standardized square root-transformed SCR (µS)", y = "Predicted values of RT (ms)") +
+  theme_apa(base_size = 11) +
+  theme(legend.position = "bottom", axis.title.y = element_text(vjust = -0.5)) +
+  scale_y_continuous(breaks=seq(450, 900, 150), limits = c(450, 900), expand = c(0,0)) +
+  scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))
+
+
+# ggsave("figure_scr_pes_raw.tiff",width = 11, height = 13 , units = "cm", dpi=600, compression = "lzw")
+```
+<br><br><br>
+
+
+## Control Analyses
+***
+We tested whether the SCR is affected by the valence of the word presented following the go/no-go response or by the fixation cross preceding the go/no-go stimulus and reflecting different feedback (white cross: correct; red cross: too slow or incorrect). Analyses were conducted using LMMs with the fixed factors response type (slow hit, fast hit, false alarm) and word valence (positive, negative) or fixation cross color (white, red), respectively. These control analyses (see below) suggested that the SCR is not confounded by events within the time window of interest. 
+<br><br>
+
+### Word valence
+
+We did not observe any differences in SCR depending on word valence.
+
+```{r SCR-valence-LMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+LMM_scr_word_valence_max <- lmer(iscr_gng_resp_sqrt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH | word),
+data = single_trial_data_scr,
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_word_valence_max) # Singular fit
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+LMM_scr_word_valence_red1 <- lmer(iscr_gng_resp_sqrt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_scr,
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_word_valence_red1) # Singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(LMM_scr_word_valence_red1)) # For participant and word stimuli there are two terms each that do not explain variance (< 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(LMM_scr_word_valence_red1), comp = "Variance") # It is pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word stimuli
+```
+
+```{r SCR-valence-LMM-final-model}
+
+#### 3) Run final model without random terms explaining zero variance 
+# (i.e., remove pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word)
+LMM_scr_word_valence_final <- lmer(iscr_gng_resp_sqrt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + FH_SH:pos_neg || participant_id) +
+  (0 + FH_SH || word),
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_word_valence_final) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_word_valence_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_word_valence_final,
+  dv.labels = "SCR
+  ", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+) 
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_word_valence_final), digits = 1, comp = "Std.Dev.")
+```
+<br><br>
+
+### Fixation cross color
+
+```{r SCR-fixcross-LMM-contrast-coding}
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_scr$fixation_cross_white) <- contr.sdif(2)
+contrasts(single_trial_data_scr$gng_response_type)    <- contr.sdif(3)
+
+
+# Add contrasts as numerical covariates via model matrix
+model_matrix <- model.matrix(~ gng_response_type * fixation_cross_white, single_trial_data_scr)
+
+
+# Attach the model matrix (only 3 new columns) to the dataframe
+single_trial_data_scr[, (ncol(single_trial_data_scr) + 1):(ncol(single_trial_data_scr) + 6)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_scr)[(ncol(single_trial_data_scr) - 5):ncol(single_trial_data_scr)] <- c(
+  "Grand Mean", "FH_SH", "FA_FH", "red_white", "FH_SH:red_white", "FA_FH:red_white"
+  )
+```
+
+We did not observe any differences in SCR depending on the color of the fixation cross preceding the go/no-go stimulus and reflecting different feedback.
+
+``` {r SCR-fixcross-LMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+LMM_scr_cross_max <- lmer(iscr_gng_resp_sqrt ~ FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white  + 
+  (1 + FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white | participant_id), 
+data = single_trial_data_scr, 
+REML = FALSE, 
+control = lmerControl(optimizer="bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_cross_max) # Singular fit
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+LMM_scr_cross_red1 <- lmer(iscr_gng_resp_sqrt ~ FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white  + 
+  (1 + FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white || participant_id), 
+data = single_trial_data_scr, 
+REML = FALSE, 
+control = lmerControl(optimizer="bobyqa")
+)
+
+
+# Check model output
+summary(LMM_scr_cross_red1) # Singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(LMM_scr_cross_red1)) # For participant there is one term that does not explain variance (< 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(LMM_scr_cross_red1), comp = "Variance") # It is FA_FH:red_white for participant
+```
+
+``` {r SCR-fixcross-LMM-final-model}
+
+#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH:red_white for participant)
+LMM_scr_cross_final <- lmer(iscr_gng_resp_sqrt ~ FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white  + 
+  (1 + FH_SH + FA_FH + red_white + FH_SH:red_white || participant_id), 
+data = single_trial_data_scr, 
+REML = TRUE, 
+control = lmerControl(optimizer="bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_cross_final) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_cross_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_cross_final,
+  dv.labels = "SCR
+  ", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+) 
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_cross_final), digits = 1, comp = "Std.Dev.")
+```
+SCR in trials beginning with a red compared to those with a white fixation cross did not differ. 
+<br><br><br>
+
+## References
+***
+Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology, 49*(4), 764-766. https://doi.org/10.1016/j.jesp.2013.03.013 <br><br> 
+Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). *Tutorials in Quantitative Methods for Psychology, 4*(2), 61-64. https://doi.org/10.20982/tqmp.04.2.p061 <br><br>
+<br>
+
+## Session Info
+***
+```{r session-info}
+
+sessionInfo()
+```
+
+

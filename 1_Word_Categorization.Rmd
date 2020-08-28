@@ -1,0 +1,841 @@
+---
+title: "Word Categorization Task"
+output: 
+  html_document
+
+---
+
+<!-- Set general settings -->
+
+```{r setup, include = FALSE}
+
+# Set general settings for markdown file
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  comment = "",
+  results = "hold"
+)
+
+
+# Clear environment
+rm(list = ls())
+
+
+# Load packages
+library(dplyr)      # for data manipulation
+library(knitr)      # for integrating computing and reporting in markdown
+library(kableExtra) # for customizing appearance of tables
+library(ggplot2)    # for plotting
+library(papaja)     # for using APA style in plots (theme_apa) and in ANOVA output
+library(ggsignif)   # for adding asterisks in plots
+library(cowplot)    # for arranging plots
+library(lme4)       # for (G)LMMs
+library(lmerTest)   # for LMM p values (Satterthwaite's method for approximating dfs for the t and F tests)
+library(MASS)       # for boxcox function and contrast definition
+library(sjPlot)     # for tab_model function to display (G)LMM results
+library(emmeans)    # for pairwise comparisons
+library(ez)         # for ANOVAs
+library(afex)       # for ANOVAs (convenience functions, e.g. for nice display)
+library(effectsize) # for effect sizes (t_to_d function)
+
+
+# Load functions
+source("./functions/summarySEwithinO.R")  # Function provided by R-cookbook: http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
+source("./functions/my_table_template.R") # Function to create table template
+
+
+# Turn off scientific notation
+options(scipen = 999)
+
+
+# Set figure theme and colors
+my_figure_theme <- theme_apa(base_size = 11) +
+  theme(legend.position = "top", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
+
+my_figure_colors <- c("#8ea6b4", "#465369")
+
+
+# Prepare labels for (G)LMM tables
+labels <- c(
+  "(Intercept)"          = "Intercept",
+  "word_valence2-1"      = "Pos - Neg",
+  "gng_response_type2-1" = "FH - SH",
+  "gng_response_type3-2" = "FA - FH",
+  "gng_response_type4-3" = "IR - FA",
+  "gng_response_type2-1:word_valence2-1" = "FH - SH x Pos - Neg",
+  "gng_response_type3-2:word_valence2-1" = "FA - FH x Pos - Neg",
+  "gng_response_type4-3:word_valence2-1" = "IR - FA x Pos - Neg",
+  "gng_response_typeSH:word_valence2-1"  = "SH: Pos - Neg",
+  "gng_response_typeFH:word_valence2-1"  = "FH: Pos - Neg",
+  "gng_response_typeFA:word_valence2-1"  = "FA: Pos - Neg",
+  "gng_response_typeIR:word_valence2-1"  = "IR: Pos - Neg"
+)
+```
+<br><br>
+
+## Data Cleaning
+***
+```{r load-and-clean-data}
+
+# Load data
+load(file = "./data/Single_Trial_Data.rda")
+
+
+# For word categorization analysis, exclude missing responses, responses with wrong key, and RT outliers 
+single_trial_data_priming <- single_trial_data %>%
+  dplyr::filter(
+      gng_response_type != "miss" &
+      gng_response_type != "wrong_key" &
+      word_accuracy     != "miss" &
+      word_accuracy     != "wrong_key" &
+      (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &
+      (is.na(word_rt_outlier) | word_rt_outlier == FALSE)
+  ) # (14130 of 15480 trials left)
+
+
+# Create numeric word accuracy variable (1 = correct, 0 = incorrect)
+single_trial_data_priming <- single_trial_data_priming %>%
+  dplyr::mutate(word_accuracy_numeric = ifelse(word_accuracy == "correct", 1, 0))
+
+
+# Make categorical variables factors
+single_trial_data_priming$gng_response_type <- factor(single_trial_data_priming$gng_response_type, levels = c("SH", "FH", "FA", "IR"))
+single_trial_data_priming$word_valence      <- factor(single_trial_data_priming$word_valence)
+single_trial_data_priming$participant_id    <- factor(single_trial_data_priming$participant_id)
+```
+
+Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant's median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of word categorization RT, only trials with correct word categorization responses were considered. In the analysis of word categorization accuracy, trials with correct or incorrect word categorization were included, but not trials with missing categorization responses or responses performed with the key to be pressed to go stimuli.  
+
+```{r excluded-trials}
+
+# Calculate percentage of excluded trials
+excluded_trials <- single_trial_data %>%
+  group_by(participant_id) %>%
+  dplyr::summarize(
+    below_100_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt < 100) / length(participant_id) * 100,
+    above_700_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt > 700) / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == "miss") / length(participant_id) * 100,
+    gng_wrong_key  = sum(gng_response_type == "wrong_key") / length(participant_id) * 100,
+    outlier_pos    = sum(!is.na(word_rt_outlier) & word_rt_outlier != FALSE & word_valence == "pos") / length(participant_id) * 100,
+    outlier_neg    = sum(!is.na(word_rt_outlier) & word_rt_outlier != FALSE & word_valence == "neg") / length(participant_id) * 100,
+    word_misses    = sum(word_accuracy == "miss") / length(participant_id) * 100,
+    word_wrong_key = sum(word_accuracy == "wrong_key") / length(participant_id) * 100
+  ) %>% 
+  # Calculate M and SD of the variables
+  dplyr::summarise_each(list(mean,sd), -participant_id)
+
+
+# Create dataframe with rows for M and SD for display
+table_excluded_trials <- as.data.frame(rbind(as.numeric(excluded_trials[,c(1:8)]),   # M
+                                             as.numeric(excluded_trials[,c(9:16)])), # SD
+                                       row.names = c("M", "SD"))
+
+
+# Display percentage of excluded trials
+my_table_template(table_excluded_trials,
+  caption = "Excluded Trials (in %)", row_names = TRUE,
+  col_names = c("< 100 ms", "> 700 ms", "Misses", "Wrong key", "Outlier pos", "Outlier neg", "Misses", "Wrong key"),
+  header_above_config = c(" " = 1, "Go/no-go trials" = 4, "Word categorization trials" = 4)
+)
+```
+<br><br>
+
+## Descriptive Statistics
+***
+### Means and CIs
+
+This table corresponds to Table S2 in the Supplemental Material.  
+
+```{r descriptive-statistics-table}
+
+# Calculate descriptive statistics for RT per condition
+descriptive_statistics_rt <- summarySEwithinO(
+  data          = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+  measurevar    = "word_rt",
+  withinvars    = c("gng_response_type", "word_valence"),
+  idvar         = "participant_id", 
+  conf.interval = .95
+) %>%
+  # Reorder factor levels for plot
+  dplyr::mutate(
+    gng_response_type = factor(gng_response_type, levels = c("SH", "FH", "FA", "IR")),
+    word_valence      = factor(word_valence, levels = c("pos", "neg"))
+  )
+
+
+# Calculate descriptive statistics for accuracy per condition
+descriptive_statistics_accuracy <- summarySEwithinO(
+  data          = single_trial_data_priming,
+  measurevar    = "word_accuracy_numeric",
+  withinvars    = c("gng_response_type", "word_valence"),
+  idvar         = "participant_id", 
+  conf.interval = .95
+) %>%
+  # Multiply numeric values by 100 to obtain values in percent
+  dplyr::mutate_if(is.numeric, list(~ . * 100)) %>%
+  # Reorder factor levels for plot
+  dplyr::mutate(
+    gng_response_type = factor(gng_response_type, levels = c("SH", "FH", "FA", "IR")),
+    word_valence      = factor(word_valence, levels = c("pos", "neg"))
+  )
+
+
+# Make a nice merged table for display
+descriptive_statistics <- full_join(descriptive_statistics_rt, descriptive_statistics_accuracy,
+  by = c("gng_response_type", "word_valence")
+) %>%
+  # Round numeric values to two decimals
+  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
+  # Format confidence interval column
+  dplyr::mutate(
+    ci_rt       = paste0("[", word_rt - ci.x, ", ", word_rt + ci.x, "]"),
+    ci_accuracy = paste0("[", word_accuracy_numeric - ci.y, ", ", word_accuracy_numeric + ci.y, "]")
+  ) %>%
+  # Select columns to be displayed
+  dplyr::select(c("gng_response_type", "word_valence", "word_rt", "ci_rt", "word_accuracy_numeric", "ci_accuracy"))
+
+
+# Display descriptive statistics for RT and accuracy (and rearrange order of rows)
+my_table_template(descriptive_statistics[c(8, 7, 4, 3, 2, 1, 6, 5), ],
+  caption = "Word Categorization Behavioral Performance",
+  col_names = c("Preceding response type", "Word valence", "M", "95% CI", "M", "95% CI"),
+  header_above_config = c(" " = 2, "RT (ms)" = 2, "Accuracy (%)" = 2),
+  footnote_config = c(general = "Confidence intervals are adjusted for within-participant designs as described by Morey (2008).")
+)
+```
+<br>
+
+### Plot
+
+This figure corresponds to Figure 2 in the paper.  
+
+```{r descriptive-statistics-plot, fig.cap = "Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)"}
+
+# Create plot RT
+plot_rt <- ggplot(descriptive_statistics_rt, 
+                  aes(x = gng_response_type, y = word_rt, fill = word_valence)) +
+  geom_bar(stat = "identity", position = position_dodge(), colour = "black", size = 0.25) +
+  geom_errorbar(aes(ymax = word_rt + ci, ymin = word_rt - ci), 
+                position = position_dodge(width = 0.9), width = 0.2, size = 0.3) +
+  my_figure_theme +
+  labs(x = "Preceding Response Type", y = "RT (ms)") +
+  coord_cartesian(ylim = c(400, 800)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = my_figure_colors, name = "Word Valence", labels = c("Pos", "Neg")) +
+  geom_signif(
+    y_position = c(785, 785, 785), xmin = c(0.75, 1.75, 2.75), xmax = c(1.25, 2.25, 3.25),
+    annotation = c("**", "***", "***"), tip_length = 0.01, vjust = 0.5, textsize = 4, size = 0.3
+  )
+
+
+# Create plot accuracy
+plot_accuracy <- ggplot(descriptive_statistics_accuracy, 
+                        aes(x = gng_response_type, y = word_accuracy_numeric, fill = word_valence)) +
+  geom_bar(stat = "identity", position = position_dodge(), colour = "black", size = 0.25) +
+  geom_errorbar(aes(ymax = word_accuracy_numeric + ci, ymin = word_accuracy_numeric - ci),
+                position = position_dodge(width = 0.9), width = 0.2, size = 0.3) +
+  my_figure_theme +
+  labs(x = "Preceding Response Type", y = "Accuracy (%)") +
+  coord_cartesian(ylim = c(50, 100)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = my_figure_colors, name = "Word Valence", labels = c("Pos", "Neg")) +
+  geom_signif(
+    y_position = c(98.2), xmin = c(2.775), xmax = c(3.225),
+    annotation = c("***"), tip_length = 0.01, vjust = 0.5, textsize = 4, size = 0.3
+  )
+
+
+# Create common legend for plots (function from http://www.sthda.com/english/wiki/wiki.php?id_contents=7930#add-a-common-legend-for-multiple-ggplot2-graphs)
+get_legend <- function(myggplot) {
+  tmp      <- ggplot_gtable(ggplot_build(myggplot))
+  leg      <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend   <- tmp$grobs[[leg]]
+  return(legend)
+}
+legend    <- get_legend(plot_rt)
+
+
+# Remove previous legends from plots
+plot_rt       <- plot_rt       + theme(legend.position = "none")
+plot_accuracy <- plot_accuracy + theme(legend.position = "none")
+
+
+# Arrange plots
+figure_priming_behav <- ggdraw() +
+  draw_plot(plot_rt,       x =  0,   y = .2,  width = .5, height = 0.7) +
+  draw_plot(plot_accuracy, x = .5,   y = .2,  width = .5, height = 0.7) +
+  draw_plot(legend,        x = 0.25, y = 0.1, width = .5, height = 0)   +
+  draw_plot_label(c("A", "B"), c(0, 0.5), c(1, 1), size = 15)
+
+
+# Save plot
+# ggsave("figure_priming_behav.tiff",width = 16, height = 10 , units = "cm", dpi=600, compression = "lzw")
+
+
+# Display plot
+figure_priming_behav
+```
+<br>
+
+### Fast hit time
+
+To obtain a sufficient number of false alarms in the go/no-go task, an individually calibrated RT limit was used. The individual RT limit was calculated in calibration blocks. Participants completed three calibration blocks that were each followed by two experimental blocks. For the first two experimental blocks, the RT limit was set to 80% of the participant’s mean RT for correct responses in the preceding calibration block. For the subsequent experimental blocks, the RT limit was set to 90% of the mean RT in the preceding calibration block. 
+
+```{r FH-time}
+
+# Calculate FH time
+FH_time <- single_trial_data_priming %>%
+  dplyr::filter(gng_response_type == "FH" | gng_response_type == "SH") %>%
+  group_by(participant_id) %>%
+  dplyr::summarize(
+    FH_1 = mean(gng_rt[trial <= 28])                 - (mean(gng_rt[trial <= 28])                 * 20) / 100,
+    FH_2 = mean(gng_rt[trial >= 173 & trial <= 200]) - (mean(gng_rt[trial >= 173 & trial <= 200]) * 10) / 100,
+    FH_3 = mean(gng_rt[trial >= 345 & trial <= 372]) - (mean(gng_rt[trial >= 345 & trial <= 372]) * 10) / 100
+  )
+
+
+FH_time_mean <- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 2)
+FH_time_sd   <- round((sd(FH_time$FH_1)   + sd(FH_time$FH_2)   + sd(FH_time$FH_3))   / 3, digits = 2)
+```
+
+FH time: *M* = `r FH_time_mean` ms, *SD* = `r FH_time_sd` ms
+<br><br><br>
+
+## (G)LMM Analyses
+***
+
+To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. 
+Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. 
+The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).
+
+```{r RT-accuracy-(G)LMM-contrast-coding}
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_priming$gng_response_type) <- contr.sdif(4)
+contrasts(single_trial_data_priming$word_valence)      <- contr.sdif(2)
+
+
+# Add contrasts as numerical covariates via model matrix*
+model_matrix <- model.matrix(~ gng_response_type * word_valence, single_trial_data_priming)
+
+
+# Attach the model matrix (8 columns) to the dataframe
+single_trial_data_priming[, (ncol(single_trial_data_priming) + 1):(ncol(single_trial_data_priming) + 8)] <- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_priming)[(ncol(single_trial_data_priming) - 7):ncol(single_trial_data_priming)] <- c(
+  "Grand Mean", "FH_SH", "FA_FH", "IR_FA", "pos_neg", "FH_SH:pos_neg", "FA_FH:pos_neg", "IR_FA:pos_neg"
+  )
+
+
+# *Note: For the random effects, we needed to enter the separate random effect terms in the models to enable
+# double-bar notation (||). This allows fitting a model that sets correlations of the random terms to zero.
+```
+<br>
+
+### RT
+
+LMM analysis of word categorization RT was conducted on inverse-transformed RT values to meet the assumption of normally distributed residuals. The appropriate transformation was determined using the Box–Cox procedure (Box & Cox, 1964). 
+
+```{r RT-LMM-determine-transformation, fig.width = 4, fig.height = 3}
+
+# Determine transformation of the dependent variable (RT) by estimating optimal lambda using Box–Cox procedure
+bc <- boxcox(word_rt ~ 1, data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ])
+optlambda <- bc$x[which.max(bc$y)]
+```
+The optimal lambda was `r round(optlambda, digits = 2)`, suggesting that inverse transformation is most appropriate.
+<br><br>
+
+```{r RT-LMM-plot-distribution, fig.width = 6, fig.height = 6}
+
+# Density plot and q-q plot for raw RT values
+par(mfrow = c(2, 2)) # arrange plots
+plot(density(single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ]$word_rt),
+  main = "Raw RT: Density  Plot"
+)
+qqnorm(single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ]$word_rt,
+  main = "Raw RT: Q-Q Plot", pch = 1, frame = FALSE
+)
+
+
+# Density plot and q-q plot for inverse-transformed RT values
+plot(density(single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ]$word_rt_inverse),
+  main = "Inverse RT: Density  Plot"
+)
+qqnorm(single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ]$word_rt_inverse,
+  main = "Inverse RT: Q-Q Plot", pch = 1, frame = FALSE
+)
+par(mfrow = c(1, 1)) # reset layout
+```
+
+We additionally performed a parallel analysis on untransformed (i.e., raw) RTs using a GLMM in which RT data were modeled with an identity link function and an inverse Gaussian distribution. This procedure was recommended by Lo and Andrews (2015), as nonlinear data transformations may systematically alter patterns of interaction effects (Balota et al., 2013).
+<br><br><br>
+
+#### Model specification {.tabset}
+
+##### LMM 
+
+```{r RT-LMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+LMM_rt_max <- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_rt_max) # Singular fit
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+LMM_rt_red1 <- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = FALSE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(LMM_rt_red1) # Singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(LMM_rt_red1)) # For word stimuli there is one term that does not explain variance (< 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(LMM_rt_red1), comp = "Variance") # It is IR - FA for word stimuli
+```
+As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (IR − FA for word stimuli) explaining zero variance was removed to prevent overparametrization. 
+<br><br><br>
+
+##### GLMM
+
+```{r RT-GLMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+GLMM_rt_max <- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+family = inverse.gaussian(link = "identity"),
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(GLMM_rt_max) # Model does not converge
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+GLMM_rt_red1 <- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+family = inverse.gaussian(link = "identity"),
+control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e6))
+)
+
+
+# Check model output
+summary(GLMM_rt_red1) # Model does not converge
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(GLMM_rt_red1)) # All terms explain variance
+
+
+# Check which random effect explains least variance
+print(VarCorr(GLMM_rt_red1), comp = "Variance") # It is FA - FH for word stimuli
+```
+As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (FA − FH for word stimuli) explaining the least variance was removed to achieve convergence.  
+<br><br>
+
+#### Run final model {.tabset}
+
+##### LMM
+
+This table corresponds to Table 2 in the paper. 
+
+```{r RT-LMM-final-model, cache = TRUE}
+
+#### 3) Run final model without random terms explaining zero variance (i.e., remove IR_FA for word stimuli)
+LMM_rt_final <- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = TRUE, 
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_rt_final) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_rt_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_final,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_rt_final), digits = 1, comp = "Std.Dev.")
+```
+Analysis of word categorization RT revealed a significant main effect of response type. Following false alarms, participants responded slower to words than following fast hits, suggesting that false alarms were associated with PES. <br>
+Crucially, the analysis further yielded the predicted interaction between response type and word valence, which was significant for false alarms compared to fast hits and for inhibited responses compared to false alarms but not for fast hits compared to slow hits. These interactions indicate that the effect of word valence on word categorization RT was different for false alarm trials compared to fast hit trials and to inhibited response trials, respectively.
+<br><br><br>
+
+##### GLMM
+
+This table corresponds to Table S3 in the Supplemental Material. 
+
+```{r RT-GLMM-final-model, cache = TRUE}
+
+#### 3) Run final model without random term with least variance to achieve convergence (i.e., remove FA - FH for word stimuli)
+GLMM_rt_final <- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+family = inverse.gaussian(link = "identity"),
+control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e6))
+)
+
+
+# Check model output
+# summary(GLMM_rt_final) # Model does converge, no singular fit 
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_rt_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_rt_final,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(GLMM_rt_final), digits = 1, comp = "Std.Dev.")
+```
+The GLMM analysis yielded the same pattern of results concerning the predicted interaction between response type and word valence as the LMM analysis of inverse-transformed RT data. 
+<br><br><br>
+
+#### Follow up interactions {.tabset}
+
+##### LMM
+
+We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
+<br><br>
+This table corresponds to Table 2 in the paper.  
+
+```{r RT-LMM-nested-model, cache = TRUE}
+
+#### 4) Run model with the effect of word valence nested within each response type
+LMM_rt_nested <- lmer(word_rt_inverse ~ gng_response_type / word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_nested,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+```
+<br>
+Following false alarms, participants categorized negative words faster than positive words. Following hits (fast hits and slow hits), participants categorized positive words faster than negative words. 
+<br><br><br>
+
+##### GLMM
+
+We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. 
+<br><br>
+This table corresponds to Table S3 in the Supplemental Material.
+
+```{r RT-GLMM-nested-model, cache = TRUE}
+
+#### 4) Run model with the effect of word valence nested within each response type
+GLMM_rt_nested <- glmer(word_rt ~ gng_response_type / word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+family = inverse.gaussian(link = "identity"),
+control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e6))
+)
+
+
+# Display results (fixed effects)
+tab_model(GLMM_rt_nested,
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value"
+)
+```
+<br>
+Following false alarms, participants categorized negative words faster than positive words. Following hits (fast hits; slow hits as statistical trend), participants categorized positive words faster than negative words. 
+<br><br><br>
+
+### Accuracy
+
+The GLMM models the probability of a correct word categorization and estimates reflect log-odds ratios for a correct response. 
+<br><br><br>
+
+#### Model specification
+
+```{r accuracy-GLMM-specification, eval = FALSE}
+
+#### 1) Run model with maximal random-effects structure
+GLMM_acc_max <- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(GLMM_acc_max) # Model does not converge
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+GLMM_acc_red1 <- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+summary(GLMM_acc_red1) # Model does converge but singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(GLMM_acc_red1)) # For participants there is one term that does not explain variance (< 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(GLMM_acc_red1), comp = "Variance") # It is FA - FH for participants
+```
+As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (FA − FH for participants) explaining zero variance was removed to prevent overparametrization. 
+<br><br><br>
+
+#### Run final model
+
+This table corresponds to Table 2 in the paper. 
+
+```{r accuracy-GLMM-final-model, cache = TRUE}
+
+#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH for participants)
+GLMM_acc_final <- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(GLMM_acc_final) # Model does converge, no singular fit 
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_acc_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_acc_final,
+  dv.labels = "Accuracy", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, 
+  show.r2 = FALSE, show.re.var = FALSE, show.ngroups = FALSE, string.stat = "z value", 
+  string.ci = "95 % CI", string.p = "p value"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(GLMM_acc_final), digits = 2, comp = "Std.Dev.")
+```
+The analysis yielded an interaction between response type and word valence, which was significant for false alarms compared to fast hits and for inhibited responses compared to false alarms. These interactions indicate that the effect of word valence on categorization accuracy was different for false alarm trials compared to fast hit trials and to inhibited response trials, respectively.
+<br><br><br>
+
+#### Follow up interactions
+
+We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
+<br><br>
+This table corresponds to Table 2 in the paper. 
+```{r accuracy-GLMM-nested-model, cache = TRUE}
+
+#### 4) Run model with the effect of word valence nested within each response type
+GLMM_acc_nested <- glmer(word_accuracy_numeric ~ gng_response_type / word_valence +
+  (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Display results (fixed effects)
+tab_model(GLMM_acc_nested,
+  dv.labels = "Accuracy", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, 
+  show.r2 = FALSE, show.re.var = FALSE, show.ngroups = FALSE, string.stat = "z value", 
+  string.ci = "95 % CI", string.p = "p value"
+)
+```
+<br>
+Following false alarms, participants categorized negative words more accurately than positive words.
+<br><br><br>
+
+## ANOVAs
+***
+To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the Supplemental Material.
+
+```{r ANOVAs}
+
+# Due to the afex package, contrasts are automatically set to effect-coding (contr.sum). Afex package 
+# also checks sphericity assumptions and automatically corrects for any violations if necessary.
+
+
+# Get data in correct format for ANOVAs (aggregate within participants per condition)
+data_anova <- single_trial_data_priming %>%
+  group_by(participant_id, gng_response_type, word_valence) %>%
+  dplyr::summarize(
+    word_rt_inverse              = mean(word_rt_inverse[word_accuracy == "correct"]),
+    percentage_correct_responses = sum(word_accuracy_numeric) / length(participant_id) * 100
+  )
+
+
+# ANOVA RT
+anova_rt <- aov_ez(
+  id     = "participant_id", 
+  dv     = "word_rt_inverse", 
+  data   = data_anova,
+  within = c("gng_response_type", "word_valence")
+)
+
+
+# ANOVA accuracy
+anova_accuracy <- aov_ez(
+  id     = "participant_id", 
+  dv     = "percentage_correct_responses", 
+  data   = data_anova,
+  within = c("gng_response_type", "word_valence")
+)
+
+
+# Display ANOVA results
+knitr::kables(
+  list(
+    my_table_template(nice(anova_rt, MSE = FALSE, sig_symbols = rep("", 4)), 
+                      header_above_config = c(" " = 1, "RT" = 4)),
+    my_table_template(nice(anova_accuracy, MSE = FALSE, sig_symbols = rep("", 4))[, c(2:5)], 
+                      header_above_config = c("Accuracy" = 4))
+  ),
+  caption = "ANOVAs"
+) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 12, full_width = F, position = "left") %>%
+  footnote(general = "Ges = generalized eta squared, the recommended effect size for repeated-measures designs (Bakeman, 2005).")
+```
+<br>
+
+### Pairwise comparisons
+
+Significant main effects and interactions were followed up with two-tailed paired *t* tests with Holm–Bonferroni *p* value adjustments.
+
+```{r ANOVAs-pairwise-tests}
+
+# Use multivariate model for all follow-up tests to adequately control for violations of sphericity
+afex_options(emmeans_model = "multivariate")
+
+
+# Pairwise t tests
+pairwise_rt_m  <- summary(pairs(emmeans(anova_rt, ~gng_response_type), adjust = "holm"))
+pairwise_rt_i  <- summary(pairs(emmeans(anova_rt, "word_valence", by = "gng_response_type"), adjust = "holm"))
+pairwise_acc_m <- summary(pairs(emmeans(anova_accuracy, ~gng_response_type), adjust = "holm"))
+pairwise_acc_i <- summary(pairs(emmeans(anova_accuracy, "word_valence", by = "gng_response_type"), adjust = "holm"))
+
+
+# Add Cohen's dz (CIs for d could be added if needed, as it can be returned by the "t_to_d" function)
+pairwise_rt_m$cohens_dz  <- round(t_to_d(pairwise_rt_m$t.ratio,  pairwise_rt_m$df,  paired = TRUE)[1], digits = 2)
+pairwise_rt_i$cohens_dz  <- round(t_to_d(pairwise_rt_i$t.ratio,  pairwise_rt_i$df,  paired = TRUE)[1], digits = 2)
+pairwise_acc_m$cohens_dz <- round(t_to_d(pairwise_acc_m$t.ratio, pairwise_acc_m$df, paired = TRUE)[1], digits = 2)
+pairwise_acc_i$cohens_dz <- round(t_to_d(pairwise_acc_i$t.ratio, pairwise_acc_i$df, paired = TRUE)[1], digits = 2)
+
+
+# Display results main effect response type
+knitr::kables(
+  list(
+    my_table_template(pairwise_rt_m, digits = c(0, 2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(" " = 1, "RT" = 6)),
+    my_table_template(pairwise_acc_m[, c(2:7)], digits = c(2, 2, 0, 2, 3, 2), 
+                      header_above_config = c("Accuracy" = 6))
+  ),
+  caption = "Main Effect Response Type"
+) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 12, full_width = F, position = "left") %>%
+  footnote(general = "P values are adjusted with Holm–Bonferroni method.")
+
+
+# Display results interaction response type x word valence
+knitr::kables(
+  list(
+    my_table_template(pairwise_rt_i, digits = c(0, 0, 2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(" " = 2, "RT" = 6)),
+    my_table_template(pairwise_acc_i[, c(3:8)], digits = c(2, 2, 0, 2, 3, 2), 
+                      header_above_config = c("Accuracy" = 6))
+  ),
+  caption = "Interaction Response Type x Word Valence"
+) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 12, full_width = F, position = "left") %>%
+  footnote(general = "P values are adjusted with Holm–Bonferroni method.")
+```
+<br><br>
+
+## References
+***
+Aarts, K., De Houwer, J., & Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. *Cognition, 124*(2), 117-127. https://doi.org/10.1016/j.cognition.2012.05.009 <br><br> 
+Aarts, K., De Houwer, J., & Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. *Emotion, 13*(5), 960-973. https://doi.org/10.1037/a0032808s <br><br>
+Bakeman, R  (2005). Recommended effect size statistics for repeated measures designs. *Behavior Research Methods, 37*(3), 379–384. https://doi.org/10.3758/BF03192707
+Balota, D. A., Aschenbrenner, A. J., & Yap, M. J. (2013). Additive effects of word frequency and stimulus quality: The influence of trial history and data transformations. *Journal of Experimental Psychology: Learning, Memory, and Cognition, 39*(5), 1563-1571. https://doi.org/10.1037/a0032186 <br><br>
+Bates, D., Kliegl, R., Vasishth, S., & Baayen, H. (2015). *Parsimonious mixed models.* arXiv. https://arxiv.org/abs/1506.04967v2 <br><br>
+Box, G. E., & Cox, D. R. (1964). An analysis of transformations. *Journal of the Royal Statistical Society: Series B (Methodological), 26*(2), 211-243. https://doi.org/10.1111/j.2517-6161.1964.tb00553.x <br><br>
+Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology, 49*(4), 764-766. https://doi.org/10.1016/j.jesp.2013.03.013 <br><br> 
+Lo, S., & Andrews, S. (2015). To transform or not to transform: Using generalized linear mixed models to analyse reaction time data. *Frontiers in Psychology, 6*, Article 1171. https://doi.org/10.3389/fpsyg.2015.01171 <br><br> 
+Matuschek, H., Kliegl, R., Vasishth, S., Baayen, H., & Bates, D. (2017). Balancing Type I error and power in linear mixed models. *Journal of Memory and Language, 94*, 305-315. https://doi.org/10.1016/j.jml.2017.01.001 <br><br> 
+Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). *Tutorials in Quantitative Methods for Psychology, 4*(2), 61-64. https://doi.org/10.20982/tqmp.04.2.p061 <br><br>
+<br>
+
+## Session Info
+***
+```{r session-info}
+
+sessionInfo()
+```

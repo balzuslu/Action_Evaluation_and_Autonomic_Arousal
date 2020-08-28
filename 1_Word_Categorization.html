@@ -1,0 +1,3409 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Word Categorization Task</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="web_style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Action Evaluation & Autonomic Arousal</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="glyphicon glyphicon-info-sign"></span>
+     
+    Task &amp; Data
+  </a>
+</li>
+<li>
+  <a href="1_Word_Categorization.html">
+    <span class="glyphicon glyphicon glyphicon glyphicon-hand-up"></span>
+     
+    Word Categorization Task
+  </a>
+</li>
+<li>
+  <a href="2_Go_No-Go.html">
+    <span class="glyphicon glyphicon glyphicon glyphicon-hand-up"></span>
+     
+    Go/No-Go Task
+  </a>
+</li>
+<li>
+  <a href="3_SCR.html">
+    <span class="glyphicon glyphicon glyphicon glyphicon-tint"></span>
+     
+    Skin Conductance Response
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:luisa.balzus@hu-berlin.de">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Word Categorization Task</h1>
+
+</div>
+
+
+<!-- Set general settings -->
+<p><br><br></p>
+<div id="data-cleaning" class="section level2">
+<h2>Data Cleaning</h2>
+<hr />
+<pre class="r"><code># Load data
+load(file = &quot;./data/Single_Trial_Data.rda&quot;)
+
+
+# For word categorization analysis, exclude missing responses, responses with wrong key, and RT outliers 
+single_trial_data_priming &lt;- single_trial_data %&gt;%
+  dplyr::filter(
+      gng_response_type != &quot;miss&quot; &amp;
+      gng_response_type != &quot;wrong_key&quot; &amp;
+      word_accuracy     != &quot;miss&quot; &amp;
+      word_accuracy     != &quot;wrong_key&quot; &amp;
+      (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &amp;
+      (is.na(word_rt_outlier) | word_rt_outlier == FALSE)
+  ) # (14130 of 15480 trials left)
+
+
+# Create numeric word accuracy variable (1 = correct, 0 = incorrect)
+single_trial_data_priming &lt;- single_trial_data_priming %&gt;%
+  dplyr::mutate(word_accuracy_numeric = ifelse(word_accuracy == &quot;correct&quot;, 1, 0))
+
+
+# Make categorical variables factors
+single_trial_data_priming$gng_response_type &lt;- factor(single_trial_data_priming$gng_response_type, levels = c(&quot;SH&quot;, &quot;FH&quot;, &quot;FA&quot;, &quot;IR&quot;))
+single_trial_data_priming$word_valence      &lt;- factor(single_trial_data_priming$word_valence)
+single_trial_data_priming$participant_id    &lt;- factor(single_trial_data_priming$participant_id)</code></pre>
+<p>Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant’s median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of word categorization RT, only trials with correct word categorization responses were considered. In the analysis of word categorization accuracy, trials with correct or incorrect word categorization were included, but not trials with missing categorization responses or responses performed with the key to be pressed to go stimuli.</p>
+<pre class="r"><code># Calculate percentage of excluded trials
+excluded_trials &lt;- single_trial_data %&gt;%
+  group_by(participant_id) %&gt;%
+  dplyr::summarize(
+    below_100_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &lt; 100) / length(participant_id) * 100,
+    above_700_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &gt; 700) / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == &quot;miss&quot;) / length(participant_id) * 100,
+    gng_wrong_key  = sum(gng_response_type == &quot;wrong_key&quot;) / length(participant_id) * 100,
+    outlier_pos    = sum(!is.na(word_rt_outlier) &amp; word_rt_outlier != FALSE &amp; word_valence == &quot;pos&quot;) / length(participant_id) * 100,
+    outlier_neg    = sum(!is.na(word_rt_outlier) &amp; word_rt_outlier != FALSE &amp; word_valence == &quot;neg&quot;) / length(participant_id) * 100,
+    word_misses    = sum(word_accuracy == &quot;miss&quot;) / length(participant_id) * 100,
+    word_wrong_key = sum(word_accuracy == &quot;wrong_key&quot;) / length(participant_id) * 100
+  ) %&gt;% 
+  # Calculate M and SD of the variables
+  dplyr::summarise_each(list(mean,sd), -participant_id)
+
+
+# Create dataframe with rows for M and SD for display
+table_excluded_trials &lt;- as.data.frame(rbind(as.numeric(excluded_trials[,c(1:8)]),   # M
+                                             as.numeric(excluded_trials[,c(9:16)])), # SD
+                                       row.names = c(&quot;M&quot;, &quot;SD&quot;))
+
+
+# Display percentage of excluded trials
+my_table_template(table_excluded_trials,
+  caption = &quot;Excluded Trials (in %)&quot;, row_names = TRUE,
+  col_names = c(&quot;&lt; 100 ms&quot;, &quot;&gt; 700 ms&quot;, &quot;Misses&quot;, &quot;Wrong key&quot;, &quot;Outlier pos&quot;, &quot;Outlier neg&quot;, &quot;Misses&quot;, &quot;Wrong key&quot;),
+  header_above_config = c(&quot; &quot; = 1, &quot;Go/no-go trials&quot; = 4, &quot;Word categorization trials&quot; = 4)
+)</code></pre>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+Excluded Trials (in %)
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Go/no-go trials
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Word categorization trials
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+&lt; 100 ms
+</th>
+<th style="text-align:right;">
+&gt; 700 ms
+</th>
+<th style="text-align:right;">
+Misses
+</th>
+<th style="text-align:right;">
+Wrong key
+</th>
+<th style="text-align:right;">
+Outlier pos
+</th>
+<th style="text-align:right;">
+Outlier neg
+</th>
+<th style="text-align:right;">
+Misses
+</th>
+<th style="text-align:right;">
+Wrong key
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.41
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+1.01
+</td>
+<td style="text-align:right;">
+0.18
+</td>
+<td style="text-align:right;">
+2.89
+</td>
+<td style="text-align:right;">
+3.40
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SD
+</td>
+<td style="text-align:right;">
+0.47
+</td>
+<td style="text-align:right;">
+2.17
+</td>
+<td style="text-align:right;">
+1.55
+</td>
+<td style="text-align:right;">
+0.19
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+1.56
+</td>
+<td style="text-align:right;">
+0.25
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+</tr>
+</tbody>
+</table>
+<p><br><br></p>
+</div>
+<div id="descriptive-statistics" class="section level2">
+<h2>Descriptive Statistics</h2>
+<hr />
+<div id="means-and-cis" class="section level3">
+<h3>Means and CIs</h3>
+<p>This table corresponds to Table S2 in the Supplemental Material.</p>
+<pre class="r"><code># Calculate descriptive statistics for RT per condition
+descriptive_statistics_rt &lt;- summarySEwithinO(
+  data          = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+  measurevar    = &quot;word_rt&quot;,
+  withinvars    = c(&quot;gng_response_type&quot;, &quot;word_valence&quot;),
+  idvar         = &quot;participant_id&quot;, 
+  conf.interval = .95
+) %&gt;%
+  # Reorder factor levels for plot
+  dplyr::mutate(
+    gng_response_type = factor(gng_response_type, levels = c(&quot;SH&quot;, &quot;FH&quot;, &quot;FA&quot;, &quot;IR&quot;)),
+    word_valence      = factor(word_valence, levels = c(&quot;pos&quot;, &quot;neg&quot;))
+  )
+
+
+# Calculate descriptive statistics for accuracy per condition
+descriptive_statistics_accuracy &lt;- summarySEwithinO(
+  data          = single_trial_data_priming,
+  measurevar    = &quot;word_accuracy_numeric&quot;,
+  withinvars    = c(&quot;gng_response_type&quot;, &quot;word_valence&quot;),
+  idvar         = &quot;participant_id&quot;, 
+  conf.interval = .95
+) %&gt;%
+  # Multiply numeric values by 100 to obtain values in percent
+  dplyr::mutate_if(is.numeric, list(~ . * 100)) %&gt;%
+  # Reorder factor levels for plot
+  dplyr::mutate(
+    gng_response_type = factor(gng_response_type, levels = c(&quot;SH&quot;, &quot;FH&quot;, &quot;FA&quot;, &quot;IR&quot;)),
+    word_valence      = factor(word_valence, levels = c(&quot;pos&quot;, &quot;neg&quot;))
+  )
+
+
+# Make a nice merged table for display
+descriptive_statistics &lt;- full_join(descriptive_statistics_rt, descriptive_statistics_accuracy,
+  by = c(&quot;gng_response_type&quot;, &quot;word_valence&quot;)
+) %&gt;%
+  # Round numeric values to two decimals
+  dplyr::mutate_if(is.numeric, round, digits = 2) %&gt;%
+  # Format confidence interval column
+  dplyr::mutate(
+    ci_rt       = paste0(&quot;[&quot;, word_rt - ci.x, &quot;, &quot;, word_rt + ci.x, &quot;]&quot;),
+    ci_accuracy = paste0(&quot;[&quot;, word_accuracy_numeric - ci.y, &quot;, &quot;, word_accuracy_numeric + ci.y, &quot;]&quot;)
+  ) %&gt;%
+  # Select columns to be displayed
+  dplyr::select(c(&quot;gng_response_type&quot;, &quot;word_valence&quot;, &quot;word_rt&quot;, &quot;ci_rt&quot;, &quot;word_accuracy_numeric&quot;, &quot;ci_accuracy&quot;))
+
+
+# Display descriptive statistics for RT and accuracy (and rearrange order of rows)
+my_table_template(descriptive_statistics[c(8, 7, 4, 3, 2, 1, 6, 5), ],
+  caption = &quot;Word Categorization Behavioral Performance&quot;,
+  col_names = c(&quot;Preceding response type&quot;, &quot;Word valence&quot;, &quot;M&quot;, &quot;95% CI&quot;, &quot;M&quot;, &quot;95% CI&quot;),
+  header_above_config = c(&quot; &quot; = 2, &quot;RT (ms)&quot; = 2, &quot;Accuracy (%)&quot; = 2),
+  footnote_config = c(general = &quot;Confidence intervals are adjusted for within-participant designs as described by Morey (2008).&quot;)
+)</code></pre>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+Word Categorization Behavioral Performance
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="2">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+RT (ms)
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Accuracy (%)
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Preceding response type
+</th>
+<th style="text-align:left;">
+Word valence
+</th>
+<th style="text-align:right;">
+M
+</th>
+<th style="text-align:left;">
+95% CI
+</th>
+<th style="text-align:right;">
+M
+</th>
+<th style="text-align:left;">
+95% CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+SH
+</td>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+578.80
+</td>
+<td style="text-align:left;">
+[573.67, 583.93]
+</td>
+<td style="text-align:right;">
+94.33
+</td>
+<td style="text-align:left;">
+[93.43, 95.23]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SH
+</td>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+602.56
+</td>
+<td style="text-align:left;">
+[597.68, 607.44]
+</td>
+<td style="text-align:right;">
+93.07
+</td>
+<td style="text-align:left;">
+[92.11, 94.03]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FH
+</td>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+569.23
+</td>
+<td style="text-align:left;">
+[563.59, 574.87]
+</td>
+<td style="text-align:right;">
+94.14
+</td>
+<td style="text-align:left;">
+[93.02, 95.26]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FH
+</td>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+608.13
+</td>
+<td style="text-align:left;">
+[602.44, 613.82]
+</td>
+<td style="text-align:right;">
+92.93
+</td>
+<td style="text-align:left;">
+[91.74, 94.12]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FA
+</td>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+743.48
+</td>
+<td style="text-align:left;">
+[723.92, 763.04]
+</td>
+<td style="text-align:right;">
+72.37
+</td>
+<td style="text-align:left;">
+[69.17, 75.57]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FA
+</td>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+635.50
+</td>
+<td style="text-align:left;">
+[621.86, 649.14]
+</td>
+<td style="text-align:right;">
+90.71
+</td>
+<td style="text-align:left;">
+[88.63, 92.79]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IR
+</td>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+698.40
+</td>
+<td style="text-align:left;">
+[688.98, 707.82]
+</td>
+<td style="text-align:right;">
+94.69
+</td>
+<td style="text-align:left;">
+[93.53, 95.85]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IR
+</td>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+689.33
+</td>
+<td style="text-align:left;">
+[680.76, 697.9]
+</td>
+<td style="text-align:right;">
+96.13
+</td>
+<td style="text-align:left;">
+[95.11, 97.15]
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Note: </span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup> Confidence intervals are adjusted for within-participant designs as described by Morey (2008).
+</td>
+</tr>
+</tfoot>
+</table>
+<p><br></p>
+</div>
+<div id="plot" class="section level3">
+<h3>Plot</h3>
+<p>This figure corresponds to Figure 2 in the paper.</p>
+<pre class="r"><code># Create plot RT
+plot_rt &lt;- ggplot(descriptive_statistics_rt, 
+                  aes(x = gng_response_type, y = word_rt, fill = word_valence)) +
+  geom_bar(stat = &quot;identity&quot;, position = position_dodge(), colour = &quot;black&quot;, size = 0.25) +
+  geom_errorbar(aes(ymax = word_rt + ci, ymin = word_rt - ci), 
+                position = position_dodge(width = 0.9), width = 0.2, size = 0.3) +
+  my_figure_theme +
+  labs(x = &quot;Preceding Response Type&quot;, y = &quot;RT (ms)&quot;) +
+  coord_cartesian(ylim = c(400, 800)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = my_figure_colors, name = &quot;Word Valence&quot;, labels = c(&quot;Pos&quot;, &quot;Neg&quot;)) +
+  geom_signif(
+    y_position = c(785, 785, 785), xmin = c(0.75, 1.75, 2.75), xmax = c(1.25, 2.25, 3.25),
+    annotation = c(&quot;**&quot;, &quot;***&quot;, &quot;***&quot;), tip_length = 0.01, vjust = 0.5, textsize = 4, size = 0.3
+  )
+
+
+# Create plot accuracy
+plot_accuracy &lt;- ggplot(descriptive_statistics_accuracy, 
+                        aes(x = gng_response_type, y = word_accuracy_numeric, fill = word_valence)) +
+  geom_bar(stat = &quot;identity&quot;, position = position_dodge(), colour = &quot;black&quot;, size = 0.25) +
+  geom_errorbar(aes(ymax = word_accuracy_numeric + ci, ymin = word_accuracy_numeric - ci),
+                position = position_dodge(width = 0.9), width = 0.2, size = 0.3) +
+  my_figure_theme +
+  labs(x = &quot;Preceding Response Type&quot;, y = &quot;Accuracy (%)&quot;) +
+  coord_cartesian(ylim = c(50, 100)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = my_figure_colors, name = &quot;Word Valence&quot;, labels = c(&quot;Pos&quot;, &quot;Neg&quot;)) +
+  geom_signif(
+    y_position = c(98.2), xmin = c(2.775), xmax = c(3.225),
+    annotation = c(&quot;***&quot;), tip_length = 0.01, vjust = 0.5, textsize = 4, size = 0.3
+  )
+
+
+# Create common legend for plots (function from http://www.sthda.com/english/wiki/wiki.php?id_contents=7930#add-a-common-legend-for-multiple-ggplot2-graphs)
+get_legend &lt;- function(myggplot) {
+  tmp      &lt;- ggplot_gtable(ggplot_build(myggplot))
+  leg      &lt;- which(sapply(tmp$grobs, function(x) x$name) == &quot;guide-box&quot;)
+  legend   &lt;- tmp$grobs[[leg]]
+  return(legend)
+}
+legend    &lt;- get_legend(plot_rt)
+
+
+# Remove previous legends from plots
+plot_rt       &lt;- plot_rt       + theme(legend.position = &quot;none&quot;)
+plot_accuracy &lt;- plot_accuracy + theme(legend.position = &quot;none&quot;)
+
+
+# Arrange plots
+figure_priming_behav &lt;- ggdraw() +
+  draw_plot(plot_rt,       x =  0,   y = .2,  width = .5, height = 0.7) +
+  draw_plot(plot_accuracy, x = .5,   y = .2,  width = .5, height = 0.7) +
+  draw_plot(legend,        x = 0.25, y = 0.1, width = .5, height = 0)   +
+  draw_plot_label(c(&quot;A&quot;, &quot;B&quot;), c(0, 0.5), c(1, 1), size = 15)
+
+
+# Save plot
+# ggsave(&quot;figure_priming_behav.tiff&quot;,width = 16, height = 10 , units = &quot;cm&quot;, dpi=600, compression = &quot;lzw&quot;)
+
+
+# Display plot
+figure_priming_behav</code></pre>
+<div class="figure">
+<img src="1_Word_Categorization_files/figure-html/descriptive-statistics-plot-1.png" alt="Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)" width="672" />
+<p class="caption">
+Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)
+</p>
+</div>
+<p><br></p>
+</div>
+<div id="fast-hit-time" class="section level3">
+<h3>Fast hit time</h3>
+<p>To obtain a sufficient number of false alarms in the go/no-go task, an individually calibrated RT limit was used. The individual RT limit was calculated in calibration blocks. Participants completed three calibration blocks that were each followed by two experimental blocks. For the first two experimental blocks, the RT limit was set to 80% of the participant’s mean RT for correct responses in the preceding calibration block. For the subsequent experimental blocks, the RT limit was set to 90% of the mean RT in the preceding calibration block.</p>
+<pre class="r"><code># Calculate FH time
+FH_time &lt;- single_trial_data_priming %&gt;%
+  dplyr::filter(gng_response_type == &quot;FH&quot; | gng_response_type == &quot;SH&quot;) %&gt;%
+  group_by(participant_id) %&gt;%
+  dplyr::summarize(
+    FH_1 = mean(gng_rt[trial &lt;= 28])                 - (mean(gng_rt[trial &lt;= 28])                 * 20) / 100,
+    FH_2 = mean(gng_rt[trial &gt;= 173 &amp; trial &lt;= 200]) - (mean(gng_rt[trial &gt;= 173 &amp; trial &lt;= 200]) * 10) / 100,
+    FH_3 = mean(gng_rt[trial &gt;= 345 &amp; trial &lt;= 372]) - (mean(gng_rt[trial &gt;= 345 &amp; trial &lt;= 372]) * 10) / 100
+  )
+
+
+FH_time_mean &lt;- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 2)
+FH_time_sd   &lt;- round((sd(FH_time$FH_1)   + sd(FH_time$FH_2)   + sd(FH_time$FH_3))   / 3, digits = 2)</code></pre>
+<p>FH time: <em>M</em> = 280.78 ms, <em>SD</em> = 40.92 ms <br><br><br></p>
+</div>
+</div>
+<div id="glmm-analyses" class="section level2">
+<h2>(G)LMM Analyses</h2>
+<hr />
+<p>To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).</p>
+<pre class="r"><code># Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_priming$gng_response_type) &lt;- contr.sdif(4)
+contrasts(single_trial_data_priming$word_valence)      &lt;- contr.sdif(2)
+
+
+# Add contrasts as numerical covariates via model matrix*
+model_matrix &lt;- model.matrix(~ gng_response_type * word_valence, single_trial_data_priming)
+
+
+# Attach the model matrix (8 columns) to the dataframe
+single_trial_data_priming[, (ncol(single_trial_data_priming) + 1):(ncol(single_trial_data_priming) + 8)] &lt;- model_matrix
+
+
+# Assign descriptive names to the contrasts
+names(single_trial_data_priming)[(ncol(single_trial_data_priming) - 7):ncol(single_trial_data_priming)] &lt;- c(
+  &quot;Grand Mean&quot;, &quot;FH_SH&quot;, &quot;FA_FH&quot;, &quot;IR_FA&quot;, &quot;pos_neg&quot;, &quot;FH_SH:pos_neg&quot;, &quot;FA_FH:pos_neg&quot;, &quot;IR_FA:pos_neg&quot;
+  )
+
+
+# *Note: For the random effects, we needed to enter the separate random effect terms in the models to enable
+# double-bar notation (||). This allows fitting a model that sets correlations of the random terms to zero.</code></pre>
+<p><br></p>
+<div id="rt" class="section level3">
+<h3>RT</h3>
+<p>LMM analysis of word categorization RT was conducted on inverse-transformed RT values to meet the assumption of normally distributed residuals. The appropriate transformation was determined using the Box–Cox procedure (Box &amp; Cox, 1964).</p>
+<pre class="r"><code># Determine transformation of the dependent variable (RT) by estimating optimal lambda using Box–Cox procedure
+bc &lt;- boxcox(word_rt ~ 1, data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ])</code></pre>
+<p><img src="1_Word_Categorization_files/figure-html/RT-LMM-determine-transformation-1.png" width="384" /></p>
+<pre class="r"><code>optlambda &lt;- bc$x[which.max(bc$y)]</code></pre>
+<p>The optimal lambda was -0.83, suggesting that inverse transformation is most appropriate. <br><br></p>
+<pre class="r"><code># Density plot and q-q plot for raw RT values
+par(mfrow = c(2, 2)) # arrange plots
+plot(density(single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ]$word_rt),
+  main = &quot;Raw RT: Density  Plot&quot;
+)
+qqnorm(single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ]$word_rt,
+  main = &quot;Raw RT: Q-Q Plot&quot;, pch = 1, frame = FALSE
+)
+
+
+# Density plot and q-q plot for inverse-transformed RT values
+plot(density(single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ]$word_rt_inverse),
+  main = &quot;Inverse RT: Density  Plot&quot;
+)
+qqnorm(single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ]$word_rt_inverse,
+  main = &quot;Inverse RT: Q-Q Plot&quot;, pch = 1, frame = FALSE
+)</code></pre>
+<p><img src="1_Word_Categorization_files/figure-html/RT-LMM-plot-distribution-1.png" width="576" /></p>
+<pre class="r"><code>par(mfrow = c(1, 1)) # reset layout</code></pre>
+<p>We additionally performed a parallel analysis on untransformed (i.e., raw) RTs using a GLMM in which RT data were modeled with an identity link function and an inverse Gaussian distribution. This procedure was recommended by Lo and Andrews (2015), as nonlinear data transformations may systematically alter patterns of interaction effects (Balota et al., 2013). <br><br><br></p>
+<div id="model-specification" class="section level4 tabset">
+<h4>Model specification</h4>
+<div id="lmm" class="section level5">
+<h5>LMM</h5>
+<pre class="r"><code>#### 1) Run model with maximal random-effects structure
+LMM_rt_max &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+REML = FALSE,
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+summary(LMM_rt_max) # Singular fit
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+LMM_rt_red1 &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+REML = FALSE,
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+summary(LMM_rt_red1) # Singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(LMM_rt_red1)) # For word stimuli there is one term that does not explain variance (&lt; 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(LMM_rt_red1), comp = &quot;Variance&quot;) # It is IR - FA for word stimuli</code></pre>
+<p>As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (IR − FA for word stimuli) explaining zero variance was removed to prevent overparametrization. <br><br><br></p>
+</div>
+<div id="glmm" class="section level5">
+<h5>GLMM</h5>
+<pre class="r"><code>#### 1) Run model with maximal random-effects structure
+GLMM_rt_max &lt;- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+family = inverse.gaussian(link = &quot;identity&quot;),
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+summary(GLMM_rt_max) # Model does not converge
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+GLMM_rt_red1 &lt;- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+family = inverse.gaussian(link = &quot;identity&quot;),
+control = glmerControl(optimizer = &quot;bobyqa&quot;, optCtrl = list(maxfun = 2e6))
+)
+
+
+# Check model output
+summary(GLMM_rt_red1) # Model does not converge
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(GLMM_rt_red1)) # All terms explain variance
+
+
+# Check which random effect explains least variance
+print(VarCorr(GLMM_rt_red1), comp = &quot;Variance&quot;) # It is FA - FH for word stimuli</code></pre>
+<p>As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (FA − FH for word stimuli) explaining the least variance was removed to achieve convergence.<br />
+<br><br></p>
+</div>
+</div>
+<div id="run-final-model" class="section level4 tabset">
+<h4>Run final model</h4>
+<div id="lmm-1" class="section level5">
+<h5>LMM</h5>
+<p>This table corresponds to Table 2 in the paper.</p>
+<pre class="r"><code>#### 3) Run final model without random terms explaining zero variance (i.e., remove IR_FA for word stimuli)
+LMM_rt_final &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+REML = TRUE, 
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+# summary(LMM_rt_final) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_rt_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_final,
+  dv.labels = &quot;RT&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;t value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;,  p.val = &quot;satterthwaite&quot;
+)
+
+
+# Display random effects
+print(&quot;Random effects:&quot;)
+print(VarCorr(LMM_rt_final), digits = 1, comp = &quot;Std.Dev.&quot;)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+RT
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+t value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.68
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.77 – -1.59
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-36.38
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.04 – 0.01
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.27
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.214
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.23
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.18 – 0.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.12
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.04 – 0.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.536
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.01
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.05 – 0.03
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.739
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.07 – 0.03
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.90
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.375
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.27 – 0.40
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+10.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.24
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.30 – -0.19
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-8.31
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+13092
+</td>
+</tr>
+</table>
+<pre><code>[1] &quot;Random effects:&quot;
+ Groups           Name          Std.Dev.
+ word             FA_FH         0.01    
+ word.1           FH_SH         0.03    
+ word.2           (Intercept)   0.05    
+ participant_id   IR_FA:pos_neg 0.11    
+ participant_id.1 FA_FH:pos_neg 0.14    
+ participant_id.2 FH_SH:pos_neg 0.10    
+ participant_id.3 pos_neg       0.08    
+ participant_id.4 IR_FA         0.14    
+ participant_id.5 FA_FH         0.13    
+ participant_id.6 FH_SH         0.06    
+ participant_id.7 (Intercept)   0.25    
+ Residual                       0.30    </code></pre>
+<p>Analysis of word categorization RT revealed a significant main effect of response type. Following false alarms, participants responded slower to words than following fast hits, suggesting that false alarms were associated with PES. <br> Crucially, the analysis further yielded the predicted interaction between response type and word valence, which was significant for false alarms compared to fast hits and for inhibited responses compared to false alarms but not for fast hits compared to slow hits. These interactions indicate that the effect of word valence on word categorization RT was different for false alarm trials compared to fast hit trials and to inhibited response trials, respectively. <br><br><br></p>
+</div>
+<div id="glmm-1" class="section level5">
+<h5>GLMM</h5>
+<p>This table corresponds to Table S3 in the Supplemental Material.</p>
+<pre class="r"><code>#### 3) Run final model without random term with least variance to achieve convergence (i.e., remove FA - FH for word stimuli)
+GLMM_rt_final &lt;- glmer(word_rt ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+family = inverse.gaussian(link = &quot;identity&quot;),
+control = glmerControl(optimizer = &quot;bobyqa&quot;, optCtrl = list(maxfun = 2e6))
+)
+
+
+# Check model output
+# summary(GLMM_rt_final) # Model does converge, no singular fit 
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_rt_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_rt_final,
+  dv.labels = &quot;RT&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;t value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;
+)
+
+
+# Display random effects
+print(&quot;Random effects:&quot;)
+print(VarCorr(GLMM_rt_final), digits = 1, comp = &quot;Std.Dev.&quot;)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+RT
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+t value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+749.11
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+725.89 – 772.32
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+63.24
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-8.78
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.51 – 3.96
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.35
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.177
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+121.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+99.99 – 142.29
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+11.23
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-4.25
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-30.71 – 22.21
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.32
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.753
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.79
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-3.29 – 32.87
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.60
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.109
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-10.32
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-28.72 – 8.09
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.272
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+136.80
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+119.54 – 154.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+15.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-106.35
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-126.62 – -86.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-10.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+13092
+</td>
+</tr>
+</table>
+<pre><code>[1] &quot;Random effects:&quot;
+ Groups           Name          Std.Dev.
+ word             IR_FA         11.421  
+ word.1           FH_SH         11.341  
+ word.2           (Intercept)   12.236  
+ participant_id   IR_FA:pos_neg 53.087  
+ participant_id.1 FA_FH:pos_neg 48.288  
+ participant_id.2 FH_SH:pos_neg 29.630  
+ participant_id.3 pos_neg       19.006  
+ participant_id.4 IR_FA         41.642  
+ participant_id.5 FA_FH         41.968  
+ participant_id.6 FH_SH         17.535  
+ participant_id.7 (Intercept)   36.253  
+ Residual                        0.007  </code></pre>
+<p>The GLMM analysis yielded the same pattern of results concerning the predicted interaction between response type and word valence as the LMM analysis of inverse-transformed RT data. <br><br><br></p>
+</div>
+</div>
+<div id="follow-up-interactions" class="section level4 tabset">
+<h4>Follow up interactions</h4>
+<div id="lmm-2" class="section level5">
+<h5>LMM</h5>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the paper.</p>
+<pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
+LMM_rt_nested &lt;- lmer(word_rt_inverse ~ gng_response_type / word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+REML = TRUE,
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_nested,
+  dv.labels = &quot;RT&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;t value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;,  p.val = &quot;satterthwaite&quot;
+)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+RT
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+t value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.68
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.77 – -1.59
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-36.38
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.04 – 0.01
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.27
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.214
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.23
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.18 – 0.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.12
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.04 – 0.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.536
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+SH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.16 – -0.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-3.35
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.001</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.12
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.17 – -0.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-4.52
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.22
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.16 – 0.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+7.15
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.03
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.09 – 0.03
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.87
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.388
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+13092
+</td>
+</tr>
+</table>
+<p><br> Following false alarms, participants categorized negative words faster than positive words. Following hits (fast hits and slow hits), participants categorized positive words faster than negative words. <br><br><br></p>
+</div>
+<div id="glmm-2" class="section level5">
+<h5>GLMM</h5>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table S3 in the Supplemental Material.</p>
+<pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
+GLMM_rt_nested &lt;- glmer(word_rt ~ gng_response_type / word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + IR_FA || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
+family = inverse.gaussian(link = &quot;identity&quot;),
+control = glmerControl(optimizer = &quot;bobyqa&quot;, optCtrl = list(maxfun = 2e6))
+)
+
+
+# Display results (fixed effects)
+tab_model(GLMM_rt_nested,
+  dv.labels = &quot;RT&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;t value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;
+)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+RT
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+t value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+749.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+728.64 – 769.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+71.74
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-8.78
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.65 – 4.09
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.181
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+121.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+93.26 – 149.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+8.52
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-4.25
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-23.55 – 15.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.666
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+SH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-19.29
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-40.01 – 1.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.82
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.068
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-29.60
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-46.41 – -12.79
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-3.45
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.001</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+107.20
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+92.29 – 122.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.85
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-13.64 – 15.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.12
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.908
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+13092
+</td>
+</tr>
+</table>
+<p><br> Following false alarms, participants categorized negative words faster than positive words. Following hits (fast hits; slow hits as statistical trend), participants categorized positive words faster than negative words. <br><br><br></p>
+</div>
+</div>
+</div>
+<div id="accuracy" class="section level3">
+<h3>Accuracy</h3>
+<p>The GLMM models the probability of a correct word categorization and estimates reflect log-odds ratios for a correct response. <br><br><br></p>
+<div id="model-specification-1" class="section level4">
+<h4>Model specification</h4>
+<pre class="r"><code>#### 1) Run model with maximal random-effects structure
+GLMM_acc_max &lt;- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg | participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA | word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+summary(GLMM_acc_max) # Model does not converge
+
+
+#### 2) Run zero-correlation parameter model by using || syntax to reduce model complexity
+GLMM_acc_red1 &lt;- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+summary(GLMM_acc_red1) # Model does converge but singular fit
+
+
+# Check PCA of random-effects variance-covariance estimates
+summary(rePCA(GLMM_acc_red1)) # For participants there is one term that does not explain variance (&lt; 0.5%)
+
+
+# Check which random effect explains near zero variance
+print(VarCorr(GLMM_acc_red1), comp = &quot;Variance&quot;) # It is FA - FH for participants</code></pre>
+<p>As the model with the maximal random-effects structure did not converge, correlation parameters between random terms were set to zero. One random effect (FA − FH for participants) explaining zero variance was removed to prevent overparametrization. <br><br><br></p>
+</div>
+<div id="run-final-model-1" class="section level4">
+<h4>Run final model</h4>
+<p>This table corresponds to Table 2 in the paper.</p>
+<pre class="r"><code>#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH for participants)
+GLMM_acc_final &lt;- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
+  (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+# summary(GLMM_acc_final) # Model does converge, no singular fit 
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_acc_final)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_acc_final,
+  dv.labels = &quot;Accuracy&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, 
+  show.r2 = FALSE, show.re.var = FALSE, show.ngroups = FALSE, string.stat = &quot;z value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;
+)
+
+
+# Display random effects
+print(&quot;Random effects:&quot;)
+print(VarCorr(GLMM_acc_final), digits = 2, comp = &quot;Std.Dev.&quot;)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+Accuracy
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Odds Ratios
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+z value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+21.31
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.99 – 30.30
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+17.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.95
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.78 – 1.16
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.49
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.623
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.39
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.31 – 0.49
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-8.05
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+4.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.94 – 5.44
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+8.82
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.38 – 0.86
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-2.68
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.007</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.05
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.69 – 1.59
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.21
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.834
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.12
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.06 – 0.23
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-6.35
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA x Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+4.59
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.33 – 9.05
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+4.40
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+14130
+</td>
+</tr>
+</table>
+<pre><code>[1] &quot;Random effects:&quot;
+ Groups           Name          Std.Dev.
+ word             IR_FA         0.14    
+ word.1           FA_FH         0.13    
+ word.2           FH_SH         0.17    
+ word.3           (Intercept)   0.53    
+ participant_id   IR_FA:pos_neg 1.08    
+ participant_id.1 pos_neg:FA_FH 1.20    
+ participant_id.2 FH_SH:pos_neg 0.47    
+ participant_id.3 pos_neg       0.68    
+ participant_id.4 IR_FA         0.38    
+ participant_id.5 FH_SH         0.15    
+ participant_id.6 (Intercept)   0.86    </code></pre>
+<p>The analysis yielded an interaction between response type and word valence, which was significant for false alarms compared to fast hits and for inhibited responses compared to false alarms. These interactions indicate that the effect of word valence on categorization accuracy was different for false alarm trials compared to fast hit trials and to inhibited response trials, respectively. <br><br><br></p>
+</div>
+<div id="follow-up-interactions-1" class="section level4">
+<h4>Follow up interactions</h4>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the paper.</p>
+<pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
+GLMM_acc_nested &lt;- glmer(word_accuracy_numeric ~ gng_response_type / word_valence +
+  (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + IR_FA || word),
+data = single_trial_data_priming,
+family = binomial,
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Display results (fixed effects)
+tab_model(GLMM_acc_nested,
+  dv.labels = &quot;Accuracy&quot;, pred.labels = labels, show.stat = TRUE, show.icc = FALSE, 
+  show.r2 = FALSE, show.re.var = FALSE, show.ngroups = FALSE, string.stat = &quot;z value&quot;, 
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;
+)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+Accuracy
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Odds Ratios
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+z value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+21.31
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.99 – 30.30
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+17.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH - SH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.95
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.78 – 1.16
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.49
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.623
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA - FH
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.39
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.31 – 0.49
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-8.05
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR - FA
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+4.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.94 – 5.44
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+8.82
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+SH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.09
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.64 – 1.85
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.32
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.750
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FH: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.67 – 1.94
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.48
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.630
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+FA: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.08 – 0.25
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-6.62
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+IR: Pos - Neg
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.33 – 1.22
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1.36
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.173
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+14130
+</td>
+</tr>
+</table>
+<p><br> Following false alarms, participants categorized negative words more accurately than positive words. <br><br><br></p>
+</div>
+</div>
+</div>
+<div id="anovas" class="section level2">
+<h2>ANOVAs</h2>
+<hr />
+<p>To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the Supplemental Material.</p>
+<pre class="r"><code># Due to the afex package, contrasts are automatically set to effect-coding (contr.sum). Afex package 
+# also checks sphericity assumptions and automatically corrects for any violations if necessary.
+
+
+# Get data in correct format for ANOVAs (aggregate within participants per condition)
+data_anova &lt;- single_trial_data_priming %&gt;%
+  group_by(participant_id, gng_response_type, word_valence) %&gt;%
+  dplyr::summarize(
+    word_rt_inverse              = mean(word_rt_inverse[word_accuracy == &quot;correct&quot;]),
+    percentage_correct_responses = sum(word_accuracy_numeric) / length(participant_id) * 100
+  )
+
+
+# ANOVA RT
+anova_rt &lt;- aov_ez(
+  id     = &quot;participant_id&quot;, 
+  dv     = &quot;word_rt_inverse&quot;, 
+  data   = data_anova,
+  within = c(&quot;gng_response_type&quot;, &quot;word_valence&quot;)
+)
+
+
+# ANOVA accuracy
+anova_accuracy &lt;- aov_ez(
+  id     = &quot;participant_id&quot;, 
+  dv     = &quot;percentage_correct_responses&quot;, 
+  data   = data_anova,
+  within = c(&quot;gng_response_type&quot;, &quot;word_valence&quot;)
+)
+
+
+# Display ANOVA results
+knitr::kables(
+  list(
+    my_table_template(nice(anova_rt, MSE = FALSE, sig_symbols = rep(&quot;&quot;, 4)), 
+                      header_above_config = c(&quot; &quot; = 1, &quot;RT&quot; = 4)),
+    my_table_template(nice(anova_accuracy, MSE = FALSE, sig_symbols = rep(&quot;&quot;, 4))[, c(2:5)], 
+                      header_above_config = c(&quot;Accuracy&quot; = 4))
+  ),
+  caption = &quot;ANOVAs&quot;
+) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;), font_size = 12, full_width = F, position = &quot;left&quot;) %&gt;%
+  footnote(general = &quot;Ges = generalized eta squared, the recommended effect size for repeated-measures designs (Bakeman, 2005).&quot;)</code></pre>
+<table class="kable_wrapper table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+ANOVAs
+</caption>
+<tbody>
+<tr>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+RT
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Effect
+</th>
+<th style="text-align:left;">
+df
+</th>
+<th style="text-align:left;">
+F
+</th>
+<th style="text-align:left;">
+ges
+</th>
+<th style="text-align:left;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+gng_response_type
+</td>
+<td style="text-align:left;">
+1.80, 52.33
+</td>
+<td style="text-align:left;">
+64.06
+</td>
+<td style="text-align:left;">
+.17
+</td>
+<td style="text-align:left;">
+&lt;.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+word_valence
+</td>
+<td style="text-align:left;">
+1, 29
+</td>
+<td style="text-align:left;">
+0.03
+</td>
+<td style="text-align:left;">
+&lt;.0001
+</td>
+<td style="text-align:left;">
+.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gng_response_type:word_valence
+</td>
+<td style="text-align:left;">
+2.21, 64.13
+</td>
+<td style="text-align:left;">
+40.73
+</td>
+<td style="text-align:left;">
+.06
+</td>
+<td style="text-align:left;">
+&lt;.0001
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Accuracy
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+df
+</th>
+<th style="text-align:left;">
+F
+</th>
+<th style="text-align:left;">
+ges
+</th>
+<th style="text-align:left;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1.42, 41.09
+</td>
+<td style="text-align:left;">
+29.36
+</td>
+<td style="text-align:left;">
+.16
+</td>
+<td style="text-align:left;">
+&lt;.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1, 29
+</td>
+<td style="text-align:left;">
+11.46
+</td>
+<td style="text-align:left;">
+.05
+</td>
+<td style="text-align:left;">
+.002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1.19, 34.41
+</td>
+<td style="text-align:left;">
+20.15
+</td>
+<td style="text-align:left;">
+.15
+</td>
+<td style="text-align:left;">
+&lt;.0001
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Note: </span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup> Ges = generalized eta squared, the recommended effect size for repeated-measures designs (Bakeman, 2005).
+</td>
+</tr>
+</tfoot>
+</table>
+<p><br></p>
+<div id="pairwise-comparisons" class="section level3">
+<h3>Pairwise comparisons</h3>
+<p>Significant main effects and interactions were followed up with two-tailed paired <em>t</em> tests with Holm–Bonferroni <em>p</em> value adjustments.</p>
+<pre class="r"><code># Use multivariate model for all follow-up tests to adequately control for violations of sphericity
+afex_options(emmeans_model = &quot;multivariate&quot;)
+
+
+# Pairwise t tests
+pairwise_rt_m  &lt;- summary(pairs(emmeans(anova_rt, ~gng_response_type), adjust = &quot;holm&quot;))
+pairwise_rt_i  &lt;- summary(pairs(emmeans(anova_rt, &quot;word_valence&quot;, by = &quot;gng_response_type&quot;), adjust = &quot;holm&quot;))
+pairwise_acc_m &lt;- summary(pairs(emmeans(anova_accuracy, ~gng_response_type), adjust = &quot;holm&quot;))
+pairwise_acc_i &lt;- summary(pairs(emmeans(anova_accuracy, &quot;word_valence&quot;, by = &quot;gng_response_type&quot;), adjust = &quot;holm&quot;))
+
+
+# Add Cohen&#39;s dz (CIs for d could be added if needed, as it can be returned by the &quot;t_to_d&quot; function)
+pairwise_rt_m$cohens_dz  &lt;- round(t_to_d(pairwise_rt_m$t.ratio,  pairwise_rt_m$df,  paired = TRUE)[1], digits = 2)
+pairwise_rt_i$cohens_dz  &lt;- round(t_to_d(pairwise_rt_i$t.ratio,  pairwise_rt_i$df,  paired = TRUE)[1], digits = 2)
+pairwise_acc_m$cohens_dz &lt;- round(t_to_d(pairwise_acc_m$t.ratio, pairwise_acc_m$df, paired = TRUE)[1], digits = 2)
+pairwise_acc_i$cohens_dz &lt;- round(t_to_d(pairwise_acc_i$t.ratio, pairwise_acc_i$df, paired = TRUE)[1], digits = 2)
+
+
+# Display results main effect response type
+knitr::kables(
+  list(
+    my_table_template(pairwise_rt_m, digits = c(0, 2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(&quot; &quot; = 1, &quot;RT&quot; = 6)),
+    my_table_template(pairwise_acc_m[, c(2:7)], digits = c(2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(&quot;Accuracy&quot; = 6))
+  ),
+  caption = &quot;Main Effect Response Type&quot;
+) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;), font_size = 12, full_width = F, position = &quot;left&quot;) %&gt;%
+  footnote(general = &quot;P values are adjusted with Holm–Bonferroni method.&quot;)
+
+
+# Display results interaction response type x word valence
+knitr::kables(
+  list(
+    my_table_template(pairwise_rt_i, digits = c(0, 0, 2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(&quot; &quot; = 2, &quot;RT&quot; = 6)),
+    my_table_template(pairwise_acc_i[, c(3:8)], digits = c(2, 2, 0, 2, 3, 2), 
+                      header_above_config = c(&quot;Accuracy&quot; = 6))
+  ),
+  caption = &quot;Interaction Response Type x Word Valence&quot;
+) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;), font_size = 12, full_width = F, position = &quot;left&quot;) %&gt;%
+  footnote(general = &quot;P values are adjusted with Holm–Bonferroni method.&quot;)</code></pre>
+<table class="kable_wrapper table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+Main Effect Response Type
+</caption>
+<tbody>
+<tr>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="6">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+RT
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+contrast
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+df
+</th>
+<th style="text-align:right;">
+t.ratio
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+cohens_dz
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+SH - FH
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+1.25
+</td>
+<td style="text-align:right;">
+0.443
+</td>
+<td style="text-align:left;">
+0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SH - FA
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-7.07
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-1.31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SH - IR
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-11.18
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-2.08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FH - FA
+</td>
+<td style="text-align:right;">
+-0.25
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-8.79
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-1.63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FH - IR
+</td>
+<td style="text-align:right;">
+-0.25
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-15.40
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-2.86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FA - IR
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+0.953
+</td>
+<td style="text-align:left;">
+-0.01
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="6">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Accuracy
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+df
+</th>
+<th style="text-align:right;">
+t.ratio
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+cohens_dz
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.38
+</td>
+<td style="text-align:right;">
+0.64
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+0.59
+</td>
+<td style="text-align:right;">
+0.562
+</td>
+<td style="text-align:left;">
+0.11
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+9.71
+</td>
+<td style="text-align:right;">
+1.58
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+6.16
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+1.14
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-1.75
+</td>
+<td style="text-align:right;">
+0.75
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-2.35
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:left;">
+-0.44
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+9.34
+</td>
+<td style="text-align:right;">
+1.69
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+5.52
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+1.02
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2.13
+</td>
+<td style="text-align:right;">
+0.83
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-2.56
+</td>
+<td style="text-align:right;">
+0.048
+</td>
+<td style="text-align:left;">
+-0.48
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-11.47
+</td>
+<td style="text-align:right;">
+1.98
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-5.80
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-1.08
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Note: </span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup> P values are adjusted with Holm–Bonferroni method.
+</td>
+</tr>
+</tfoot>
+</table>
+<table class="kable_wrapper table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+Interaction Response Type x Word Valence
+</caption>
+<tbody>
+<tr>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="2">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="6">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+RT
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+contrast
+</th>
+<th style="text-align:left;">
+gng_response_type
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+df
+</th>
+<th style="text-align:right;">
+t.ratio
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+cohens_dz
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+neg - pos
+</td>
+<td style="text-align:left;">
+SH
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+3.91
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:left;">
+0.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg - pos
+</td>
+<td style="text-align:left;">
+FH
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+5.28
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+0.98
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg - pos
+</td>
+<td style="text-align:left;">
+FA
+</td>
+<td style="text-align:right;">
+-0.23
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-5.73
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+-1.06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg - pos
+</td>
+<td style="text-align:left;">
+IR
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+1.69
+</td>
+<td style="text-align:right;">
+0.103
+</td>
+<td style="text-align:left;">
+0.31
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="6">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Accuracy
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+df
+</th>
+<th style="text-align:right;">
+t.ratio
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+cohens_dz
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+-1.39
+</td>
+<td style="text-align:right;">
+1.16
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-1.20
+</td>
+<td style="text-align:right;">
+0.240
+</td>
+<td style="text-align:left;">
+-0.22
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-1.04
+</td>
+<td style="text-align:right;">
+1.07
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-0.97
+</td>
+<td style="text-align:right;">
+0.339
+</td>
+<td style="text-align:left;">
+-0.18
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+19.82
+</td>
+<td style="text-align:right;">
+4.43
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+4.47
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+0.83
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.33
+</td>
+<td style="text-align:right;">
+0.96
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+1.38
+</td>
+<td style="text-align:right;">
+0.177
+</td>
+<td style="text-align:left;">
+0.26
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Note: </span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup> P values are adjusted with Holm–Bonferroni method.
+</td>
+</tr>
+</tfoot>
+</table>
+<p><br><br></p>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<hr />
+<p>Aarts, K., De Houwer, J., &amp; Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. <em>Cognition, 124</em>(2), 117-127. <a href="https://doi.org/10.1016/j.cognition.2012.05.009" class="uri">https://doi.org/10.1016/j.cognition.2012.05.009</a> <br><br> Aarts, K., De Houwer, J., &amp; Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. <em>Emotion, 13</em>(5), 960-973. <a href="https://doi.org/10.1037/a0032808s" class="uri">https://doi.org/10.1037/a0032808s</a> <br><br> Bakeman, R (2005). Recommended effect size statistics for repeated measures designs. <em>Behavior Research Methods, 37</em>(3), 379–384. <a href="https://doi.org/10.3758/BF03192707" class="uri">https://doi.org/10.3758/BF03192707</a> Balota, D. A., Aschenbrenner, A. J., &amp; Yap, M. J. (2013). Additive effects of word frequency and stimulus quality: The influence of trial history and data transformations. <em>Journal of Experimental Psychology: Learning, Memory, and Cognition, 39</em>(5), 1563-1571. <a href="https://doi.org/10.1037/a0032186" class="uri">https://doi.org/10.1037/a0032186</a> <br><br> Bates, D., Kliegl, R., Vasishth, S., &amp; Baayen, H. (2015). <em>Parsimonious mixed models.</em> arXiv. <a href="https://arxiv.org/abs/1506.04967v2" class="uri">https://arxiv.org/abs/1506.04967v2</a> <br><br> Box, G. E., &amp; Cox, D. R. (1964). An analysis of transformations. <em>Journal of the Royal Statistical Society: Series B (Methodological), 26</em>(2), 211-243. <a href="https://doi.org/10.1111/j.2517-6161.1964.tb00553.x" class="uri">https://doi.org/10.1111/j.2517-6161.1964.tb00553.x</a> <br><br> Leys, C., Ley, C., Klein, O., Bernard, P., &amp; Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. <em>Journal of Experimental Social Psychology, 49</em>(4), 764-766. <a href="https://doi.org/10.1016/j.jesp.2013.03.013" class="uri">https://doi.org/10.1016/j.jesp.2013.03.013</a> <br><br> Lo, S., &amp; Andrews, S. (2015). To transform or not to transform: Using generalized linear mixed models to analyse reaction time data. <em>Frontiers in Psychology, 6</em>, Article 1171. <a href="https://doi.org/10.3389/fpsyg.2015.01171" class="uri">https://doi.org/10.3389/fpsyg.2015.01171</a> <br><br> Matuschek, H., Kliegl, R., Vasishth, S., Baayen, H., &amp; Bates, D. (2017). Balancing Type I error and power in linear mixed models. <em>Journal of Memory and Language, 94</em>, 305-315. <a href="https://doi.org/10.1016/j.jml.2017.01.001" class="uri">https://doi.org/10.1016/j.jml.2017.01.001</a> <br><br> Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). <em>Tutorials in Quantitative Methods for Psychology, 4</em>(2), 61-64. <a href="https://doi.org/10.20982/tqmp.04.2.p061" class="uri">https://doi.org/10.20982/tqmp.04.2.p061</a> <br><br> <br></p>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session Info</h2>
+<hr />
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 16299)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252    LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
+[5] LC_TIME=German_Germany.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] plyr_1.8.4        effectsize_0.3.2  afex_0.25-1       ez_4.4-0          emmeans_1.4.2     sjPlot_2.8.4      MASS_7.3-51.4    
+ [8] lmerTest_3.1-0    lme4_1.1-21       Matrix_1.2-17     cowplot_1.0.0     ggsignif_0.6.0    papaja_0.1.0.9842 ggplot2_3.3.2    
+[15] kableExtra_1.1.0  knitr_1.29        dplyr_0.8.3      
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-140        insight_0.9.0       webshot_0.5.1       httr_1.4.1          numDeriv_2016.8-1.1 tools_3.6.1        
+ [7] backports_1.1.5     R6_2.4.1            sjlabelled_1.1.3    mgcv_1.8-28         colorspace_1.4-1    withr_2.1.2        
+[13] tidyselect_0.2.5    curl_4.2            compiler_3.6.1      performance_0.4.3   rvest_0.3.4         xml2_1.2.2         
+[19] sandwich_2.5-1      labeling_0.3        bayestestR_0.7.2    scales_1.1.0        mvtnorm_1.0-11      readr_1.3.1        
+[25] stringr_1.4.0       digest_0.6.22       foreign_0.8-71      minqa_1.2.4         rmarkdown_1.16      rio_0.5.16         
+[31] pkgconfig_2.0.3     htmltools_0.4.0     highr_0.8           rlang_0.4.2         readxl_1.3.1        rstudioapi_0.10    
+[37] farver_2.0.1        generics_0.0.2      zoo_1.8-6           zip_2.0.4           car_3.0-5           magrittr_1.5       
+[43] parameters_0.8.2    Rcpp_1.0.3          munsell_0.5.0       abind_1.4-5         lifecycle_0.1.0     stringi_1.4.3      
+[49] multcomp_1.4-10     yaml_2.2.0          carData_3.0-3       grid_3.6.1          parallel_3.6.1      sjmisc_2.8.2       
+[55] forcats_0.4.0       crayon_1.3.4        lattice_0.20-38     ggeffects_0.15.1    haven_2.2.0         splines_3.6.1      
+[61] sjstats_0.17.8      hms_0.5.2           zeallot_0.1.0       pillar_1.4.2        boot_1.3-22         estimability_1.3   
+[67] reshape2_1.4.3      codetools_0.2-16    glue_1.3.1          evaluate_0.14       data.table_1.12.6   modelr_0.1.5       
+[73] vctrs_0.2.0         nloptr_1.2.1        cellranger_1.1.0    gtable_0.3.0        purrr_0.3.3         tidyr_1.0.0        
+[79] assertthat_0.2.1    xfun_0.16           openxlsx_4.1.3      xtable_1.8-4        broom_0.5.2         coda_0.19-3        
+[85] survival_2.44-1.1   viridisLite_0.3.0   tibble_2.1.3        TH.data_1.0-10     </code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
