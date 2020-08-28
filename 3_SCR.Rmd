@@ -45,7 +45,7 @@ options(scipen = 999)
 
 # Set figure theme 
 my_figure_theme <- theme_apa(base_size = 11) +
-  theme(legend.position = "top", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
+  theme(legend.position = "bottom", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
 
 
 # prepare labels for LMM tables
@@ -511,67 +511,40 @@ tab_model(LMM_scr_priming_nested,
 Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. 
 <br><br><br>
 
-#### Plot PES - SCR Finding
-<br>
+#### Plot PES - SCR Effect
+
 The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. 
-<br><br>
 
-##### Model on inverse RTs (original)
+```{r plot-pes-scr-original, cache = TRUE, fig.width = 4, fig.cap = "Note. Error bars indicate 95% confidence intervals."}
 
-```{r plot-pes-scr-original, cache = TRUE, fig.width = 4, fig.cap = "Error bars indicate 95% confidence intervals."}
-
-# Original LMM doesn't work with plot_model: plot_model does not like interactions in random structure
-# Thus, I have to delete double bar syntax (model does still converge, is not singular)
-# Also: respecify model to have factors as fixed effects, not contrasts: needed to plot all levels of a factor, not only a specific contrast
-LMM_scr_priming_plot <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
-                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
-                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
-                               data = single_trial_data_scr,
-                               REML = TRUE,
-                               control = lmerControl(optimizer = "bobyqa")
+# Respecify LMM without interactions stated with ":" in random structure (because plot_model does not like that) and to have 
+# fixed effects as factors, not contrasts (needed to have all factor levels in the plot)
+# Double bar syntax for zero-correlation parameter model won't work anymore (model still converges and fit is not singular)
+LMM_scr_priming_plot <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
+  (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
+  (1 + gng_response_type + iscr_gng_resp_sqrt_z | word),
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
 )
 
 
-plot_model(LMM_scr_priming_plot, type = "pred", terms = c("iscr_gng_resp_sqrt_z", "gng_response_type"), legend.title = "Response Type") + 
-  labs(title = NULL, x = "Standardized square root-transformed SCR (µS)", y = "Predicted values of inverse RT (-1000/RT in ms)") +
-  theme_apa(base_size = 11) +
-  theme(legend.position = "bottom", axis.title.y = element_text(vjust = -0.5)) +
+# Plot marginal effects
+plot_model(LMM_scr_priming_plot, 
+           type         = "pred", 
+           terms        = c("iscr_gng_resp_sqrt_z", "gng_response_type"), 
+           legend.title = "Response Type", 
+           colors       = c("#56B4E9", "#009E73", "#F0E442")) +
+  labs(title = NULL, 
+       x     = "Standardized square root-transformed SCR (µS)", 
+       y     = "Predicted values of inverse RT (-1000/RT in ms)") +
+  my_figure_theme +
+  theme(axis.ticks.x = NULL) + 
   scale_y_continuous(breaks=seq(-2, -1.3, 0.1), limits = c(-2, -1.3), expand = c(0,0)) +
   scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))
 
 
 # ggsave("figure_scr_pes.tiff",width = 11, height = 13 , units = "cm", dpi=600, compression = "lzw")
-
-# Possibility 2: specify model as LMM_scr_priming_final (but specify factors as fixed effects, leave contrasts as random effects) but delete interactions from random structure (gives almost same result, a bit narrower CIs, but model results are more different to original model)
-
-# Possibility 3: I could specify LMM_scr_priming_plot with raw values to see how the plot would like on the raw RT scale (other back-transformation of estimates is not possible; only predictors can be back-transformed: https://github.com/strengejacke/sjPlot/issues/544)
-```
-<br><br>
-
-##### Model on raw RTs
-
-This is just to see how the plot would like on the raw RT scale. The model is only approximately comparable to the original one (as it models the raw RT values, not the inverse-transformed values). For reporting, the plot based on the original model should be used.
-
-```{r plot-pes-scr-raw, cache = TRUE, fig.width = 4}
-
-# I could plot LMM with raw values, other back transformation of estimates is not possible (only predictors can be backtransformed)
-LMM_scr_priming_plot_raw <- lmer(word_rt ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
-                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
-                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
-                               data = single_trial_data_scr,
-                               REML = TRUE,
-                               control = lmerControl(optimizer = "bobyqa")
-)
-
-plot_model(LMM_scr_priming_plot_raw, type = "pred", terms = c("iscr_gng_resp_sqrt_z", "gng_response_type"), legend.title = "Response Type") + 
-  labs(title = NULL, x = "Standardized square root-transformed SCR (µS)", y = "Predicted values of RT (ms)") +
-  theme_apa(base_size = 11) +
-  theme(legend.position = "bottom", axis.title.y = element_text(vjust = -0.5)) +
-  scale_y_continuous(breaks=seq(450, 900, 150), limits = c(450, 900), expand = c(0,0)) +
-  scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))
-
-
-# ggsave("figure_scr_pes_raw.tiff",width = 11, height = 13 , units = "cm", dpi=600, compression = "lzw")
 ```
 <br><br><br>
 

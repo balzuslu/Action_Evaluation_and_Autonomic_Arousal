@@ -1495,64 +1495,42 @@ Observations
 </table>
 <p><br> Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. <br><br><br></p>
 </div>
-<div id="plot-pes---scr-finding" class="section level4">
-<h4>Plot PES - SCR Finding</h4>
-<p><br> The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. <br><br></p>
-<div id="model-on-inverse-rts-original" class="section level5">
-<h5>Model on inverse RTs (original)</h5>
-<pre class="r"><code># Original LMM doesn&#39;t work with plot_model: plot_model does not like interactions in random structure
-# Thus, I have to delete double bar syntax (model does still converge, is not singular)
-# Also: respecify model to have factors as fixed effects, not contrasts: needed to plot all levels of a factor, not only a specific contrast
-LMM_scr_priming_plot &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
-                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
-                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
-                               data = single_trial_data_scr,
-                               REML = TRUE,
-                               control = lmerControl(optimizer = &quot;bobyqa&quot;)
+<div id="plot-pes---scr-effect" class="section level4">
+<h4>Plot PES - SCR Effect</h4>
+<p>The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM.</p>
+<pre class="r"><code># Respecify LMM without interactions stated with &quot;:&quot; in random structure (because plot_model does not like that) and to have 
+# fixed effects as factors, not contrasts (needed to have all factor levels in the plot)
+# Double bar syntax for zero-correlation parameter model won&#39;t work anymore (model still converges and fit is not singular)
+LMM_scr_priming_plot &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
+  (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
+  (1 + gng_response_type + iscr_gng_resp_sqrt_z | word),
+data = single_trial_data_scr,
+REML = TRUE,
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
 )
 
 
-plot_model(LMM_scr_priming_plot, type = &quot;pred&quot;, terms = c(&quot;iscr_gng_resp_sqrt_z&quot;, &quot;gng_response_type&quot;), legend.title = &quot;Response Type&quot;) + 
-  labs(title = NULL, x = &quot;Standardized square root-transformed SCR (µS)&quot;, y = &quot;Predicted values of inverse RT (-1000/RT in ms)&quot;) +
-  theme_apa(base_size = 11) +
-  theme(legend.position = &quot;bottom&quot;, axis.title.y = element_text(vjust = -0.5)) +
+# Plot marginal effects
+plot_model(LMM_scr_priming_plot, 
+           type         = &quot;pred&quot;, 
+           terms        = c(&quot;iscr_gng_resp_sqrt_z&quot;, &quot;gng_response_type&quot;), 
+           legend.title = &quot;Response Type&quot;, 
+           colors       = c(&quot;#56B4E9&quot;, &quot;#009E73&quot;, &quot;#F0E442&quot;)) +
+  labs(title = NULL, 
+       x     = &quot;Standardized square root-transformed SCR (µS)&quot;, 
+       y     = &quot;Predicted values of inverse RT (-1000/RT in ms)&quot;) +
+  my_figure_theme +
+  theme(axis.ticks.x = NULL) + 
   scale_y_continuous(breaks=seq(-2, -1.3, 0.1), limits = c(-2, -1.3), expand = c(0,0)) +
   scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))</code></pre>
 <div class="figure">
-<img src="3_SCR_files/figure-html/plot-pes-scr-original-1.png" alt="Error bars indicate 95% confidence intervals." width="384" />
+<img src="3_SCR_files/figure-html/plot-pes-scr-original-1.png" alt="Note. Error bars indicate 95% confidence intervals." width="384" />
 <p class="caption">
-Error bars indicate 95% confidence intervals.
+Note. Error bars indicate 95% confidence intervals.
 </p>
 </div>
-<pre class="r"><code># ggsave(&quot;figure_scr_pes.tiff&quot;,width = 11, height = 13 , units = &quot;cm&quot;, dpi=600, compression = &quot;lzw&quot;)
-
-# Possibility 2: specify model as LMM_scr_priming_final (but specify factors as fixed effects, leave contrasts as random effects) but delete interactions from random structure (gives almost same result, a bit narrower CIs, but model results are more different to original model)
-
-# Possibility 3: I could specify LMM_scr_priming_plot with raw values to see how the plot would like on the raw RT scale (other back-transformation of estimates is not possible; only predictors can be back-transformed: https://github.com/strengejacke/sjPlot/issues/544)</code></pre>
-<p><br><br></p>
-</div>
-<div id="model-on-raw-rts" class="section level5">
-<h5>Model on raw RTs</h5>
-<p>This is just to see how the plot would like on the raw RT scale. The model is only approximately comparable to the original one (as it models the raw RT values, not the inverse-transformed values). For reporting, the plot based on the original model should be used.</p>
-<pre class="r"><code># I could plot LMM with raw values, other back transformation of estimates is not possible (only predictors can be backtransformed)
-LMM_scr_priming_plot_raw &lt;- lmer(word_rt ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z + 
-                                 (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
-                                 (1 + gng_response_type                + iscr_gng_resp_sqrt_z | word),
-                               data = single_trial_data_scr,
-                               REML = TRUE,
-                               control = lmerControl(optimizer = &quot;bobyqa&quot;)
-)
-
-plot_model(LMM_scr_priming_plot_raw, type = &quot;pred&quot;, terms = c(&quot;iscr_gng_resp_sqrt_z&quot;, &quot;gng_response_type&quot;), legend.title = &quot;Response Type&quot;) + 
-  labs(title = NULL, x = &quot;Standardized square root-transformed SCR (µS)&quot;, y = &quot;Predicted values of RT (ms)&quot;) +
-  theme_apa(base_size = 11) +
-  theme(legend.position = &quot;bottom&quot;, axis.title.y = element_text(vjust = -0.5)) +
-  scale_y_continuous(breaks=seq(450, 900, 150), limits = c(450, 900), expand = c(0,0)) +
-  scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))</code></pre>
-<p><img src="3_SCR_files/figure-html/plot-pes-scr-raw-1.png" width="384" /></p>
-<pre class="r"><code># ggsave(&quot;figure_scr_pes_raw.tiff&quot;,width = 11, height = 13 , units = &quot;cm&quot;, dpi=600, compression = &quot;lzw&quot;)</code></pre>
+<pre class="r"><code># ggsave(&quot;figure_scr_pes.tiff&quot;,width = 11, height = 13 , units = &quot;cm&quot;, dpi=600, compression = &quot;lzw&quot;)</code></pre>
 <p><br><br><br></p>
-</div>
 </div>
 </div>
 </div>
@@ -2038,27 +2016,26 @@ loaded via a namespace (and not attached):
  [7] highr_0.8           yaml_2.2.0          bayestestR_0.7.2   
 [10] numDeriv_2016.8-1.1 pillar_1.4.2        backports_1.1.5    
 [13] lattice_0.20-38     glue_1.3.1          digest_0.6.22      
-[16] RColorBrewer_1.1-2  rvest_0.3.4         minqa_1.2.4        
-[19] colorspace_1.4-1    sandwich_2.5-1      htmltools_0.4.0    
-[22] pkgconfig_2.0.3     broom_0.5.2         haven_2.2.0        
-[25] purrr_0.3.3         xtable_1.8-4        mvtnorm_1.0-11     
-[28] webshot_0.5.1       scales_1.1.0        emmeans_1.4.2      
-[31] tibble_2.1.3        farver_2.0.1        generics_0.0.2     
-[34] sjlabelled_1.1.3    TH.data_1.0-10      withr_2.1.2        
-[37] survival_2.44-1.1   magrittr_1.5        crayon_1.3.4       
-[40] effectsize_0.3.2    estimability_1.3    evaluate_0.14      
-[43] nlme_3.1-140        forcats_0.4.0       xml2_1.2.2         
-[46] tools_3.6.1         hms_0.5.2           lifecycle_0.1.0    
-[49] multcomp_1.4-10     stringr_1.4.0       munsell_0.5.0      
-[52] ggeffects_0.15.1    compiler_3.6.1      rlang_0.4.2        
-[55] grid_3.6.1          nloptr_1.2.1        parameters_0.8.2   
-[58] rstudioapi_0.10     rmarkdown_1.16      boot_1.3-22        
-[61] gtable_0.3.0        codetools_0.2-16    sjstats_0.17.8     
-[64] sjmisc_2.8.2        R6_2.4.1            zoo_1.8-6          
-[67] performance_0.4.3   zeallot_0.1.0       insight_0.9.0      
-[70] readr_1.3.1         stringi_1.4.3       Rcpp_1.0.3         
-[73] vctrs_0.2.0         tidyselect_0.2.5    xfun_0.16          
-[76] coda_0.19-3        </code></pre>
+[16] rvest_0.3.4         minqa_1.2.4         colorspace_1.4-1   
+[19] sandwich_2.5-1      htmltools_0.4.0     pkgconfig_2.0.3    
+[22] broom_0.5.2         haven_2.2.0         purrr_0.3.3        
+[25] xtable_1.8-4        mvtnorm_1.0-11      webshot_0.5.1      
+[28] scales_1.1.0        emmeans_1.4.2       tibble_2.1.3       
+[31] farver_2.0.1        generics_0.0.2      sjlabelled_1.1.3   
+[34] TH.data_1.0-10      withr_2.1.2         survival_2.44-1.1  
+[37] magrittr_1.5        crayon_1.3.4        effectsize_0.3.2   
+[40] estimability_1.3    evaluate_0.14       nlme_3.1-140       
+[43] forcats_0.4.0       xml2_1.2.2          tools_3.6.1        
+[46] hms_0.5.2           lifecycle_0.1.0     multcomp_1.4-10    
+[49] stringr_1.4.0       munsell_0.5.0       ggeffects_0.15.1   
+[52] compiler_3.6.1      rlang_0.4.2         grid_3.6.1         
+[55] nloptr_1.2.1        parameters_0.8.2    rstudioapi_0.10    
+[58] rmarkdown_1.16      boot_1.3-22         gtable_0.3.0       
+[61] codetools_0.2-16    sjstats_0.17.8      sjmisc_2.8.2       
+[64] R6_2.4.1            zoo_1.8-6           performance_0.4.3  
+[67] zeallot_0.1.0       insight_0.9.0       readr_1.3.1        
+[70] stringi_1.4.3       Rcpp_1.0.3          vctrs_0.2.0        
+[73] tidyselect_0.2.5    xfun_0.16           coda_0.19-3        </code></pre>
 </div>
 
 
