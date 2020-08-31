@@ -99,7 +99,7 @@ single_trial_data[single_trial_data$trial == 1   | single_trial_data$trial == 29
                   single_trial_data$trial == 445,]$fixation_cross_white <- TRUE
 
 
-# For SCR analysis, exclude exclude inhibited responses, missing responses, responses with wrong key, trials with    
+# For SCR analysis, exclude exclude inhibited gng responses, missing responses, responses with wrong key, trials with    
 # incorrect word categorization, RT outliers, and trials that were followed or preceded by trials with incorrect responses
 single_trial_data_scr <- single_trial_data %>%
   dplyr::filter(
@@ -141,7 +141,7 @@ Trials were excluded from all analyses if RT in the go/no-go task was shorter th
 ***
 ### Means and CIs
 
-This table corresponds to Table S4 in the Supplemental Material.  
+This table corresponds to Table S4 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -174,9 +174,9 @@ my_table_template(descriptive_statistics_scr_z[c(3, 2, 1), c(1:3)],
 
 ### Plot
 
-This figure corresponds to Figure 3 in the paper. 
+This figure corresponds to Figure 3 in the manuscript. 
 
-```{r descriptive-statistics-plot, fig.cap = "Note. Standardized SCR is shown as a function of response type in the go/no-go task. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)"}
+```{r descriptive-statistics-plot, fig.cap = "Note. Standardized SCR is shown as a function of response type in the go/no-go task. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by Morey (2008). Asterisks refer to significant differences based on linear mixed-effects model analysis."}
 
 # Create plot standardized SCR
 plot_scr <- ggplot(descriptive_statistics_scr_z, 
@@ -238,7 +238,7 @@ For details on contrast coding and the procedure used to specify the random-effe
 
 As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
 <br><br>
-This table corresponds to the results section "Skin Conductance Response" in the paper and Table S5 in the Supplemental Material.  
+This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S5 in the supplemental material.  
 
 ```{r SCR-LMM-final-model-1}
 
@@ -294,7 +294,7 @@ Participants exhibited a higher SCR following false alarms than following fast h
 
 #### Run second model 
 
-This table corresponds to the results section "Skin Conductance Response" in the paper and Table S5 in the Supplemental Material.  
+This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S5 in the supplemental material.  
 
 ```{r SCR-LMM-final-model-2}
 
@@ -438,11 +438,12 @@ As the model with the maximal random-effects structure did not converge, correla
 
 #### Run final model
 
-This table corresponds to Table 3 in the paper. 
+This table corresponds to Table 3 in the manuscript. 
 
 ```{r SCR-priming-LMM-final-model, cache = TRUE}
 
-#### 3) Run final model without random terms explaining zero variance (i.e., remove all interaction terms involving the factor SCR)
+#### 3) Run final model without random terms explaining zero variance 
+# (i.e., remove all interaction terms involving the factor SCR)
 LMM_scr_priming_final <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
   (1 + FH_SH + FA_FH + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + iscr_gng_resp_sqrt_z || participant_id) +
   (1 + FH_SH + FA_FH + iscr_gng_resp_sqrt_z || word),
@@ -481,7 +482,7 @@ The analysis revealed a statistical trend for a main effect of SCR in the predic
 
 We followed up this interaction by reparametrizing the fixed-effects part of the model with the effect of word valence and SCR and their interaction nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
 <br><br>
-This table corresponds to Table 3 in the paper.  
+This table corresponds to Table 3 in the manuscript.  
 
 ```{r SCR-priming-LMM-nested-model, cache = TRUE}
 
@@ -511,15 +512,15 @@ tab_model(LMM_scr_priming_nested,
 Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. 
 <br><br><br>
 
-#### Plot PES - SCR Effect
+#### Plot PES - SCR effect
 
 The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. 
 
-```{r plot-pes-scr-original, cache = TRUE, fig.width = 4, fig.cap = "Note. Error bars indicate 95% confidence intervals."}
+```{r plot-pes-scr-original, cache = TRUE, fig.cap = "Note. Error bars indicate 95% confidence intervals."}
 
-# Respecify LMM without interactions stated with ":" in random structure (because plot_model does not like that) and to have 
-# fixed effects as factors, not contrasts (needed to have all factor levels in the plot)
-# Double bar syntax for zero-correlation parameter model won't work anymore (model still converges and fit is not singular)
+# Respecify LMM without interactions stated with ":" in random structure (because plot_model does not like that) 
+# Also enter fixed effects as factors, not contrasts (to have all factor levels in the plot)
+# Double bar syntax for zero-correlation parameter model won't work anymore (full model still converges, no singular fit)
 LMM_scr_priming_plot <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
   (1 + gng_response_type * word_valence + iscr_gng_resp_sqrt_z | participant_id) +
   (1 + gng_response_type + iscr_gng_resp_sqrt_z | word),
@@ -541,7 +542,7 @@ plot_model(LMM_scr_priming_plot,
   my_figure_theme +
   theme(axis.ticks.x = NULL) + 
   scale_y_continuous(breaks=seq(-2, -1.3, 0.1), limits = c(-2, -1.3), expand = c(0,0)) +
-  scale_x_continuous(breaks=seq(-4, 6, 2), limits = c(-4, 6), expand = c(0,0))
+  scale_x_continuous(breaks=seq(-4, 6, 2),      limits = c(-4, 6),    expand = c(0,0))
 
 
 # ggsave("figure_scr_pes.tiff",width = 11, height = 13 , units = "cm", dpi=600, compression = "lzw")
@@ -551,7 +552,7 @@ plot_model(LMM_scr_priming_plot,
 
 ## Control Analyses
 ***
-We tested whether the SCR is affected by the valence of the word presented following the go/no-go response or by the fixation cross preceding the go/no-go stimulus and reflecting different feedback (white cross: correct; red cross: too slow or incorrect). Analyses were conducted using LMMs with the fixed factors response type (slow hit, fast hit, false alarm) and word valence (positive, negative) or fixation cross color (white, red), respectively. These control analyses (see below) suggested that the SCR is not confounded by events within the time window of interest. 
+We tested whether the SCR is affected by the valence of the word presented following the go/no-go response or by the fixation cross preceding the go/no-go stimulus and reflecting different feedback (white cross: previous response in the go/no-go task correct; red cross: previous response in the go/no-go task too slow or incorrect). Analyses were conducted using LMMs with the fixed factors response type (slow hit, fast hit, false alarm) and word valence (positive, negative) or fixation cross color (white, red), respectively. These control analyses (see below) suggested that the SCR is not confounded by events within the time window of interest. 
 <br><br>
 
 ### Word valence
@@ -645,7 +646,7 @@ contrasts(single_trial_data_scr$gng_response_type)    <- contr.sdif(3)
 model_matrix <- model.matrix(~ gng_response_type * fixation_cross_white, single_trial_data_scr)
 
 
-# Attach the model matrix (only 3 new columns) to the dataframe
+# Attach the model matrix (6 columns) to the dataframe
 single_trial_data_scr[, (ncol(single_trial_data_scr) + 1):(ncol(single_trial_data_scr) + 6)] <- model_matrix
 
 
@@ -725,7 +726,7 @@ tab_model(LMM_scr_cross_final,
 print("Random effects:")
 print(VarCorr(LMM_scr_cross_final), digits = 1, comp = "Std.Dev.")
 ```
-SCR in trials beginning with a red compared to those with a white fixation cross did not differ. 
+SCR in trials beginning with a red compared to those with a white fixation cross did not differ significantly. 
 <br><br><br>
 
 ## References
