@@ -3,20 +3,27 @@ Feeling Bad About Being Wrong: Affective Evaluation of Performed Actions and its
 
 Luisa Balzus, Julia Klawohn, and Norbert Kathmann
 -->
+---
+
+**For our project page with analysis code and output for performed analyses please visit**
+https://balzuslu.github.io/action_evaluation_and_autonomic_arousal
+
+---
+
 
 
 ## Task
 
 - Participants performed an affective priming task that comprised a speeded go/no-go task with an embedded word categorization task. Responses in the go/no-go task served as a primes, the subsequently presented affective words as targets. Response facilitation in the word categorization task when preceded by an action in the go/no-go task of the same assigned valence will be referred to as affective priming effect. We assessed participants' accuracy and response time (RT) in the go/no-go task and the word categorization task.<br><br>
 - Go/no-go Task
-	- A white arrow pointing either upward or downward either turned
+	- A white arrow pointing upward or downward either turned
 		- green and kept its initial orientation (2/3 of the trials; go trials)
 		- turquoise and kept its orientation (1/6 of the trials; no-go trials), or
 		- green but reversed its orientation (1/6 of the trials; no-go trials).<br><br>
 	- Participants were instructed to respond to go trials, but not to no-go trials.<br><br>
 	- Four response types in the go/no-go task were differentiated:
 		- SH: slow hits (i.e., correct responses in go trials above the individual RT limit)
-		- FH: fast hits (i.e., correct responses in go trials below the RT limit)
+		- FH: fast hits (i.e., correct responses in go trials below the individual RT limit)
 		- FA: false alarms (i.e., erroneous responses in no-go trials)
 		- IR: inhibited responses (i.e., successful response inhibitions in no-go trials)<br><br>
 - Word categorization task
@@ -30,6 +37,7 @@ Luisa Balzus, Julia Klawohn, and Norbert Kathmann
 ## Design
 
 - 4 x 2 design: go/no-go response type (SH, FH, FA, IR) and word valence (positive, negative) as within-participants factors<br><br>
+
 
 ## Data Description
 
@@ -55,7 +63,6 @@ Luisa Balzus, Julia Klawohn, and Norbert Kathmann
 | word_rt_inverse                               	| Inverse-transformed RT in the word categorization task                                                                                                	 											| -1000/RT in milliseconds <br> NAs for trials in which no response was made (miss)                                                                                                                 |
 | iscr_gng_resp                                 	| Integrated SCR extracted within a time window from 1 to 4 s after the response in the go/no-go task                                                     											 	| ISCR in microsiemens                                                                                                                                                                          	|
 | trial_followed_or_preceded_<br>by_any_incorr_resp | Indication whether trial was followed / preceded by any incorrect response in the go/no-go or the word categorization task                            												| TRUE <br> FALSE                                                                                                                                                                               	|
-
 
 
 ## References
