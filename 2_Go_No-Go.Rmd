@@ -50,10 +50,10 @@ options(scipen = 999)
 load(file = "./data/Single_Trial_Data.rda")
 
 
-# For go/no-go RT analysis, exclude inhibited responses, missing gng responses, gng responses with wrong key, and RT outliers
+# For go/no-go RT analysis, exclude inhibited gng responses, missing gng responses, gng responses with wrong key, and RT outliers
 single_trial_data_gng_rt <- single_trial_data %>%
   dplyr::filter(
-      gng_response_type != "IR" &  
+    gng_response_type != "IR" &
       gng_response_type != "miss" &
       gng_response_type != "wrong_key" &
       (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &
@@ -73,7 +73,7 @@ Trials were excluded from all analyses if RT in the go/no-go task was shorter th
 ***
 ### Means and CIs
 
-This table corresponds to Table S6 in the Supplemental Material.  
+This table corresponds to Table S6 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -84,30 +84,30 @@ descriptive_statistics_rt <- summarySEwithinO(
   withinvars    = "gng_response_type",
   idvar         = "participant_id",
   conf.interval = .95
-) 
+)
 
 
 # Prepare calculation of descriptive statistics for proportion of response types (based on all trials)
 descriptive_statistics_proportion <- single_trial_data %>%
   group_by(participant_id) %>%
   dplyr::summarize(
-    gng_SH         = sum(gng_response_type == "SH") / length(participant_id) * 100,
-    gng_FH         = sum(gng_response_type == "FH") / length(participant_id) * 100,
-    gng_FA         = sum(gng_response_type == "FA") / length(participant_id) * 100,
-    gng_IR         = sum(gng_response_type == "IR") / length(participant_id) * 100,
-    gng_misses     = sum(gng_response_type == "miss") / length(participant_id) * 100,
+    gng_SH         = sum(gng_response_type == "SH")        / length(participant_id) * 100,
+    gng_FH         = sum(gng_response_type == "FH")        / length(participant_id) * 100,
+    gng_FA         = sum(gng_response_type == "FA")        / length(participant_id) * 100,
+    gng_IR         = sum(gng_response_type == "IR")        / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == "miss")      / length(participant_id) * 100,
     gng_wrong_key  = sum(gng_response_type == "wrong_key") / length(participant_id) * 100,
-  ) 
+  )
 
 
-# Calculate descriptive statistics for proportion (exclude first column containing participant ID) 
-descriptive_statistics_proportion <- as.data.frame(t(stat.desc(descriptive_statistics_proportion[,-1]))) %>%
+# Calculate descriptive statistics for proportion (exclude first column containing participant ID)
+descriptive_statistics_proportion <- as.data.frame(t(stat.desc(descriptive_statistics_proportion[, -1]))) %>%
   # Select relevant columns
   dplyr::select(c("mean", "CI.mean.0.95")) %>%
   # Create response type column for subsequent merging
   dplyr::mutate(
     gng_response_type = c("SH", "FH", "FA", "IR", "Missing response", "Wrong key response")
-    )
+  )
 
 
 # Make a nice merged table for display
@@ -126,7 +126,7 @@ descriptive_statistics <- full_join(descriptive_statistics_rt, descriptive_stati
 
 
 # Display descriptive statistics for RT and proportion (and rearrange order of rows)
-my_table_template(descriptive_statistics[c(3, 2, 1, 4,5,6), ],
+my_table_template(descriptive_statistics[c(3, 2, 1, 4, 5, 6), ],
   caption = "Go/No-Go Task Behavioral Performance",
   col_names = c("Response type", "M", "95% CI", "M", "95% CI"),
   header_above_config = c(" " = 1, "RT (ms)" = 2, "Proportion (%)" = 2),
@@ -169,7 +169,7 @@ For details on contrast coding and the procedure used to specify the random-effe
 
 As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
 <br><br>
-This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the paper and Table S7 in the Supplemental Material.  
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S7 in the supplemental material.  
 
 ```{r RT-LMM-final-model-1}
 
@@ -178,7 +178,7 @@ contrasts(single_trial_data_gng_rt$gng_response_type) <- contr.sdif(3)
 
 
 # Add contrasts as numerical covariates via model matrix
-model_matrix <- model.matrix(~ gng_response_type, single_trial_data_gng_rt)
+model_matrix <- model.matrix(~gng_response_type, single_trial_data_gng_rt)
 
 
 # Attach the model matrix (3 columns) to the dataframe
@@ -188,12 +188,12 @@ single_trial_data_gng_rt[, (ncol(single_trial_data_gng_rt) + 1):(ncol(single_tri
 # Assign descriptive names to the contrasts
 names(single_trial_data_gng_rt)[(ncol(single_trial_data_gng_rt) - 2):ncol(single_trial_data_gng_rt)] <- c(
   "Grand Mean", "FH_SH", "FA_FH"
-  )
+)
 
 
 # Run model with maximal random-effects structure
 LMM_gng_rt_1 <- lmer(gng_rt_inverse ~ gng_response_type +
-  (1 + FH_SH + FA_FH | participant_id), 
+  (1 + FH_SH + FA_FH | participant_id),
 data = single_trial_data_gng_rt,
 REML = TRUE,
 control = lmerControl(optimizer = "bobyqa")
@@ -218,8 +218,8 @@ labels <- c(
 
 # Display results (fixed effects)
 tab_model(LMM_gng_rt_1,
-  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
-  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value",
   string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
 )
 
@@ -233,12 +233,12 @@ RTs were longer for slow hits compared to fast hits. RTs for fast hits and false
 
 #### Run second model 
 
-This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the paper and Table S7 in the Supplemental Material. 
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S7 in the supplemental material. 
 
 ```{r RT-LMM-final-model-2}
 
 # Reorder factor levels
-single_trial_data_gng_rt$gng_response_type <- factor(single_trial_data_gng_rt$gng_response_type, levels=c("SH","FA","FH")) 
+single_trial_data_gng_rt$gng_response_type <- factor(single_trial_data_gng_rt$gng_response_type, levels = c("SH", "FA", "FH"))
 
 
 # Define contrasts (sliding difference contrasts)
@@ -246,7 +246,7 @@ contrasts(single_trial_data_gng_rt$gng_response_type) <- contr.sdif(3)
 
 
 # Add contrasts as numerical covariates via model matrix
-model_matrix <- model.matrix(~ gng_response_type, single_trial_data_gng_rt)
+model_matrix <- model.matrix(~gng_response_type, single_trial_data_gng_rt)
 
 
 # Attach the model matrix (3 columns) to the dataframe
@@ -256,12 +256,12 @@ single_trial_data_gng_rt[, (ncol(single_trial_data_gng_rt) + 1):(ncol(single_tri
 # Assign descriptive names to the contrasts
 names(single_trial_data_gng_rt)[(ncol(single_trial_data_gng_rt) - 2):ncol(single_trial_data_gng_rt)] <- c(
   "Grand Mean", "FA_SH", "FH_FA"
-  )
+)
 
 
 # Run model with maximal random-effects structure
 LMM_gng_rt_2 <- lmer(gng_rt_inverse ~ gng_response_type +
-  (1 + FA_SH + FH_FA | participant_id), 
+  (1 + FA_SH + FH_FA | participant_id),
 data = single_trial_data_gng_rt,
 REML = TRUE,
 control = lmerControl(optimizer = "bobyqa")
@@ -286,8 +286,8 @@ labels <- c(
 
 # Display results (fixed effects)
 tab_model(LMM_gng_rt_2,
-  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
-  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  dv.labels = "RT", pred.labels = labels, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value",
   string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
 )
 
