@@ -450,12 +450,12 @@ excluded_trials &lt;- single_trial_data %&gt;%
   dplyr::summarize(
     below_100_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &lt; 100) / length(participant_id) * 100,
     above_700_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &gt; 700) / length(participant_id) * 100,
-    gng_misses     = sum(gng_response_type == &quot;miss&quot;) / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == &quot;miss&quot;)      / length(participant_id) * 100,
     gng_wrong_key  = sum(gng_response_type == &quot;wrong_key&quot;) / length(participant_id) * 100,
     outlier_pos    = sum(!is.na(word_rt_outlier) &amp; word_rt_outlier != FALSE &amp; word_valence == &quot;pos&quot;) / length(participant_id) * 100,
     outlier_neg    = sum(!is.na(word_rt_outlier) &amp; word_rt_outlier != FALSE &amp; word_valence == &quot;neg&quot;) / length(participant_id) * 100,
-    word_misses    = sum(word_accuracy == &quot;miss&quot;) / length(participant_id) * 100,
-    word_wrong_key = sum(word_accuracy == &quot;wrong_key&quot;) / length(participant_id) * 100
+    word_misses    = sum(word_accuracy == &quot;miss&quot;)          / length(participant_id) * 100,
+    word_wrong_key = sum(word_accuracy == &quot;wrong_key&quot;)     / length(participant_id) * 100
   ) %&gt;% 
   # Calculate M and SD of the variables
   dplyr::summarise_each(list(mean,sd), -participant_id)
@@ -589,7 +589,7 @@ SD
 <hr />
 <div id="means-and-cis" class="section level3">
 <h3>Means and CIs</h3>
-<p>This table corresponds to Table S2 in the Supplemental Material.</p>
+<p>This table corresponds to Table S2 in the supplemental material.</p>
 <pre class="r"><code># Calculate descriptive statistics for RT per condition
 descriptive_statistics_rt &lt;- summarySEwithinO(
   data          = single_trial_data_priming[single_trial_data_priming$word_accuracy == &quot;correct&quot;, ],
@@ -863,7 +863,7 @@ neg
 </div>
 <div id="plot" class="section level3">
 <h3>Plot</h3>
-<p>This figure corresponds to Figure 2 in the paper.</p>
+<p>This figure corresponds to Figure 2 in the manuscript.</p>
 <pre class="r"><code># Create plot RT
 plot_rt &lt;- ggplot(descriptive_statistics_rt, 
                   aes(x = gng_response_type, y = word_rt, fill = word_valence)) +
@@ -928,9 +928,9 @@ figure_priming_behav &lt;- ggdraw() +
 # Display plot
 figure_priming_behav</code></pre>
 <div class="figure">
-<img src="1_Word_Categorization_files/figure-html/descriptive-statistics-plot-1.png" alt="Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)" width="672" />
+<img src="1_Word_Categorization_files/figure-html/descriptive-statistics-plot-1.png" alt="Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of preceding response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by Morey (2008). Asterisks refer to significant differences based on linear mixed-effects model analysis." width="672" />
 <p class="caption">
-Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)
+Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of preceding response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by Morey (2008). Asterisks refer to significant differences based on linear mixed-effects model analysis.
 </p>
 </div>
 <p><br></p>
@@ -957,7 +957,7 @@ FH_time_sd   &lt;- round((sd(FH_time$FH_1)   + sd(FH_time$FH_2)   + sd(FH_time$F
 <div id="glmm-analyses" class="section level2">
 <h2>(G)LMM Analyses</h2>
 <hr />
-<p>To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).</p>
+<p>To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. <br><br> Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).</p>
 <pre class="r"><code># Define contrasts (sliding difference contrasts)
 contrasts(single_trial_data_priming$gng_response_type) &lt;- contr.sdif(4)
 contrasts(single_trial_data_priming$word_valence)      &lt;- contr.sdif(2)
@@ -1092,7 +1092,7 @@ print(VarCorr(GLMM_rt_red1), comp = &quot;Variance&quot;) # It is FA - FH for wo
 <h4>Run final model</h4>
 <div id="lmm-1" class="section level5">
 <h5>LMM</h5>
-<p>This table corresponds to Table 2 in the paper.</p>
+<p>This table corresponds to Table 2 in the manuscript.</p>
 <pre class="r"><code>#### 3) Run final model without random terms explaining zero variance (i.e., remove IR_FA for word stimuli)
 LMM_rt_final &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence +
   (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -1311,7 +1311,7 @@ Observations
 </div>
 <div id="glmm-1" class="section level5">
 <h5>GLMM</h5>
-<p>This table corresponds to Table S3 in the Supplemental Material.</p>
+<p>This table corresponds to Table S3 in the supplemental material.</p>
 <pre class="r"><code>#### 3) Run final model without random term with least variance to achieve convergence (i.e., remove FA - FH for word stimuli)
 GLMM_rt_final &lt;- glmer(word_rt ~ gng_response_type * word_valence +
   (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -1533,7 +1533,7 @@ Observations
 <h4>Follow up interactions</h4>
 <div id="lmm-2" class="section level5">
 <h5>LMM</h5>
-<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the paper.</p>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the manuscript.</p>
 <pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
 LMM_rt_nested &lt;- lmer(word_rt_inverse ~ gng_response_type / word_valence +
   (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -1725,7 +1725,7 @@ Observations
 </div>
 <div id="glmm-2" class="section level5">
 <h5>GLMM</h5>
-<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table S3 in the Supplemental Material.</p>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table S3 in the supplemental material.</p>
 <pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
 GLMM_rt_nested &lt;- glmer(word_rt ~ gng_response_type / word_valence +
   (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -1947,7 +1947,7 @@ control = glmerControl(optimizer = &quot;bobyqa&quot;)
 
 
 # Check model output
-summary(GLMM_acc_red1) # Model does converge but singular fit
+summary(GLMM_acc_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
@@ -1960,7 +1960,7 @@ print(VarCorr(GLMM_acc_red1), comp = &quot;Variance&quot;) # It is FA - FH for p
 </div>
 <div id="run-final-model-1" class="section level4">
 <h4>Run final model</h4>
-<p>This table corresponds to Table 2 in the paper.</p>
+<p>This table corresponds to Table 2 in the manuscript.</p>
 <pre class="r"><code>#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH for participants)
 GLMM_acc_final &lt;- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
   (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -2178,7 +2178,7 @@ Observations
 </div>
 <div id="follow-up-interactions-1" class="section level4">
 <h4>Follow up interactions</h4>
-<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the paper.</p>
+<p>We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. <br><br> This table corresponds to Table 2 in the manuscript.</p>
 <pre class="r"><code>#### 4) Run model with the effect of word valence nested within each response type
 GLMM_acc_nested &lt;- glmer(word_accuracy_numeric ~ gng_response_type / word_valence +
   (1 + FH_SH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
@@ -2373,7 +2373,7 @@ Observations
 <div id="anovas" class="section level2">
 <h2>ANOVAs</h2>
 <hr />
-<p>To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the Supplemental Material.</p>
+<p>To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the supplemental material.</p>
 <pre class="r"><code># Due to the afex package, contrasts are automatically set to effect-coding (contr.sum). Afex package 
 # also checks sphericity assumptions and automatically corrects for any violations if necessary.
 
@@ -3285,7 +3285,7 @@ cohens_dz
 <div id="references" class="section level2">
 <h2>References</h2>
 <hr />
-<p>Aarts, K., De Houwer, J., &amp; Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. <em>Cognition, 124</em>(2), 117-127. <a href="https://doi.org/10.1016/j.cognition.2012.05.009" class="uri">https://doi.org/10.1016/j.cognition.2012.05.009</a> <br><br> Aarts, K., De Houwer, J., &amp; Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. <em>Emotion, 13</em>(5), 960-973. <a href="https://doi.org/10.1037/a0032808s" class="uri">https://doi.org/10.1037/a0032808s</a> <br><br> Bakeman, R (2005). Recommended effect size statistics for repeated measures designs. <em>Behavior Research Methods, 37</em>(3), 379–384. <a href="https://doi.org/10.3758/BF03192707" class="uri">https://doi.org/10.3758/BF03192707</a> Balota, D. A., Aschenbrenner, A. J., &amp; Yap, M. J. (2013). Additive effects of word frequency and stimulus quality: The influence of trial history and data transformations. <em>Journal of Experimental Psychology: Learning, Memory, and Cognition, 39</em>(5), 1563-1571. <a href="https://doi.org/10.1037/a0032186" class="uri">https://doi.org/10.1037/a0032186</a> <br><br> Bates, D., Kliegl, R., Vasishth, S., &amp; Baayen, H. (2015). <em>Parsimonious mixed models.</em> arXiv. <a href="https://arxiv.org/abs/1506.04967v2" class="uri">https://arxiv.org/abs/1506.04967v2</a> <br><br> Box, G. E., &amp; Cox, D. R. (1964). An analysis of transformations. <em>Journal of the Royal Statistical Society: Series B (Methodological), 26</em>(2), 211-243. <a href="https://doi.org/10.1111/j.2517-6161.1964.tb00553.x" class="uri">https://doi.org/10.1111/j.2517-6161.1964.tb00553.x</a> <br><br> Leys, C., Ley, C., Klein, O., Bernard, P., &amp; Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. <em>Journal of Experimental Social Psychology, 49</em>(4), 764-766. <a href="https://doi.org/10.1016/j.jesp.2013.03.013" class="uri">https://doi.org/10.1016/j.jesp.2013.03.013</a> <br><br> Lo, S., &amp; Andrews, S. (2015). To transform or not to transform: Using generalized linear mixed models to analyse reaction time data. <em>Frontiers in Psychology, 6</em>, Article 1171. <a href="https://doi.org/10.3389/fpsyg.2015.01171" class="uri">https://doi.org/10.3389/fpsyg.2015.01171</a> <br><br> Matuschek, H., Kliegl, R., Vasishth, S., Baayen, H., &amp; Bates, D. (2017). Balancing Type I error and power in linear mixed models. <em>Journal of Memory and Language, 94</em>, 305-315. <a href="https://doi.org/10.1016/j.jml.2017.01.001" class="uri">https://doi.org/10.1016/j.jml.2017.01.001</a> <br><br> Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). <em>Tutorials in Quantitative Methods for Psychology, 4</em>(2), 61-64. <a href="https://doi.org/10.20982/tqmp.04.2.p061" class="uri">https://doi.org/10.20982/tqmp.04.2.p061</a> <br><br> <br></p>
+<p>Aarts, K., De Houwer, J., &amp; Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. <em>Cognition, 124</em>(2), 117-127. <a href="https://doi.org/10.1016/j.cognition.2012.05.009" class="uri">https://doi.org/10.1016/j.cognition.2012.05.009</a> <br><br> Aarts, K., De Houwer, J., &amp; Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. <em>Emotion, 13</em>(5), 960-973. <a href="https://doi.org/10.1037/a0032808s" class="uri">https://doi.org/10.1037/a0032808s</a> <br><br> Bakeman, R (2005). Recommended effect size statistics for repeated measures designs. <em>Behavior Research Methods, 37</em>(3), 379–384. <a href="https://doi.org/10.3758/BF03192707" class="uri">https://doi.org/10.3758/BF03192707</a> <br><br> Balota, D. A., Aschenbrenner, A. J., &amp; Yap, M. J. (2013). Additive effects of word frequency and stimulus quality: The influence of trial history and data transformations. <em>Journal of Experimental Psychology: Learning, Memory, and Cognition, 39</em>(5), 1563-1571. <a href="https://doi.org/10.1037/a0032186" class="uri">https://doi.org/10.1037/a0032186</a> <br><br> Bates, D., Kliegl, R., Vasishth, S., &amp; Baayen, H. (2015). <em>Parsimonious mixed models.</em> arXiv. <a href="https://arxiv.org/abs/1506.04967v2" class="uri">https://arxiv.org/abs/1506.04967v2</a> <br><br> Box, G. E., &amp; Cox, D. R. (1964). An analysis of transformations. <em>Journal of the Royal Statistical Society: Series B (Methodological), 26</em>(2), 211-243. <a href="https://doi.org/10.1111/j.2517-6161.1964.tb00553.x" class="uri">https://doi.org/10.1111/j.2517-6161.1964.tb00553.x</a> <br><br> Leys, C., Ley, C., Klein, O., Bernard, P., &amp; Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. <em>Journal of Experimental Social Psychology, 49</em>(4), 764-766. <a href="https://doi.org/10.1016/j.jesp.2013.03.013" class="uri">https://doi.org/10.1016/j.jesp.2013.03.013</a> <br><br> Lo, S., &amp; Andrews, S. (2015). To transform or not to transform: Using generalized linear mixed models to analyse reaction time data. <em>Frontiers in Psychology, 6</em>, Article 1171. <a href="https://doi.org/10.3389/fpsyg.2015.01171" class="uri">https://doi.org/10.3389/fpsyg.2015.01171</a> <br><br> Matuschek, H., Kliegl, R., Vasishth, S., Baayen, H., &amp; Bates, D. (2017). Balancing Type I error and power in linear mixed models. <em>Journal of Memory and Language, 94</em>, 305-315. <a href="https://doi.org/10.1016/j.jml.2017.01.001" class="uri">https://doi.org/10.1016/j.jml.2017.01.001</a> <br><br> Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). <em>Tutorials in Quantitative Methods for Psychology, 4</em>(2), 61-64. <a href="https://doi.org/10.20982/tqmp.04.2.p061" class="uri">https://doi.org/10.20982/tqmp.04.2.p061</a> <br><br> <br></p>
 </div>
 <div id="session-info" class="section level2">
 <h2>Session Info</h2>
@@ -3298,33 +3298,51 @@ Running under: Windows 10 x64 (build 16299)
 Matrix products: default
 
 locale:
-[1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252    LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
+[1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252   
+[3] LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
 [5] LC_TIME=German_Germany.1252    
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] plyr_1.8.4        effectsize_0.3.2  afex_0.25-1       ez_4.4-0          emmeans_1.4.2     sjPlot_2.8.4      MASS_7.3-51.4    
- [8] lmerTest_3.1-0    lme4_1.1-21       Matrix_1.2-17     cowplot_1.0.0     ggsignif_0.6.0    papaja_0.1.0.9842 ggplot2_3.3.2    
-[15] kableExtra_1.1.0  knitr_1.29        dplyr_0.8.3      
+ [1] plyr_1.8.4        effectsize_0.3.2  afex_0.25-1       ez_4.4-0         
+ [5] emmeans_1.4.2     sjPlot_2.8.4      MASS_7.3-51.4     lmerTest_3.1-0   
+ [9] lme4_1.1-21       Matrix_1.2-17     cowplot_1.0.0     ggsignif_0.6.0   
+[13] papaja_0.1.0.9842 ggplot2_3.3.2     kableExtra_1.1.0  knitr_1.29       
+[17] dplyr_0.8.3      
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-140        insight_0.9.0       webshot_0.5.1       httr_1.4.1          numDeriv_2016.8-1.1 tools_3.6.1        
- [7] backports_1.1.5     R6_2.4.1            sjlabelled_1.1.3    mgcv_1.8-28         colorspace_1.4-1    withr_2.1.2        
-[13] tidyselect_0.2.5    curl_4.2            compiler_3.6.1      performance_0.4.3   rvest_0.3.4         xml2_1.2.2         
-[19] sandwich_2.5-1      labeling_0.3        bayestestR_0.7.2    scales_1.1.0        mvtnorm_1.0-11      readr_1.3.1        
-[25] stringr_1.4.0       digest_0.6.22       foreign_0.8-71      minqa_1.2.4         rmarkdown_1.16      rio_0.5.16         
-[31] pkgconfig_2.0.3     htmltools_0.4.0     highr_0.8           rlang_0.4.2         readxl_1.3.1        rstudioapi_0.10    
-[37] farver_2.0.1        generics_0.0.2      zoo_1.8-6           zip_2.0.4           car_3.0-5           magrittr_1.5       
-[43] parameters_0.8.2    Rcpp_1.0.3          munsell_0.5.0       abind_1.4-5         lifecycle_0.1.0     stringi_1.4.3      
-[49] multcomp_1.4-10     yaml_2.2.0          carData_3.0-3       grid_3.6.1          parallel_3.6.1      sjmisc_2.8.2       
-[55] forcats_0.4.0       crayon_1.3.4        lattice_0.20-38     ggeffects_0.15.1    haven_2.2.0         splines_3.6.1      
-[61] sjstats_0.17.8      hms_0.5.2           zeallot_0.1.0       pillar_1.4.2        boot_1.3-22         estimability_1.3   
-[67] reshape2_1.4.3      codetools_0.2-16    glue_1.3.1          evaluate_0.14       data.table_1.12.6   modelr_0.1.5       
-[73] vctrs_0.2.0         nloptr_1.2.1        cellranger_1.1.0    gtable_0.3.0        purrr_0.3.3         tidyr_1.0.0        
-[79] assertthat_0.2.1    xfun_0.16           openxlsx_4.1.3      xtable_1.8-4        broom_0.5.2         coda_0.19-3        
-[85] survival_2.44-1.1   viridisLite_0.3.0   tibble_2.1.3        TH.data_1.0-10     </code></pre>
+ [1] nlme_3.1-140        insight_0.9.0       webshot_0.5.1      
+ [4] httr_1.4.1          numDeriv_2016.8-1.1 tools_3.6.1        
+ [7] backports_1.1.5     R6_2.4.1            sjlabelled_1.1.3   
+[10] mgcv_1.8-28         colorspace_1.4-1    withr_2.1.2        
+[13] tidyselect_0.2.5    curl_4.2            compiler_3.6.1     
+[16] performance_0.4.3   rvest_0.3.4         xml2_1.2.2         
+[19] sandwich_2.5-1      labeling_0.3        bayestestR_0.7.2   
+[22] scales_1.1.0        mvtnorm_1.0-11      readr_1.3.1        
+[25] stringr_1.4.0       digest_0.6.22       foreign_0.8-71     
+[28] minqa_1.2.4         rmarkdown_1.16      rio_0.5.16         
+[31] pkgconfig_2.0.3     htmltools_0.4.0     highr_0.8          
+[34] rlang_0.4.2         readxl_1.3.1        rstudioapi_0.10    
+[37] farver_2.0.1        generics_0.0.2      zoo_1.8-6          
+[40] zip_2.0.4           car_3.0-5           magrittr_1.5       
+[43] parameters_0.8.2    Rcpp_1.0.3          munsell_0.5.0      
+[46] abind_1.4-5         lifecycle_0.1.0     stringi_1.4.3      
+[49] multcomp_1.4-10     yaml_2.2.0          carData_3.0-3      
+[52] grid_3.6.1          parallel_3.6.1      sjmisc_2.8.2       
+[55] forcats_0.4.0       crayon_1.3.4        lattice_0.20-38    
+[58] ggeffects_0.15.1    haven_2.2.0         splines_3.6.1      
+[61] sjstats_0.17.8      hms_0.5.2           zeallot_0.1.0      
+[64] pillar_1.4.2        boot_1.3-22         estimability_1.3   
+[67] reshape2_1.4.3      codetools_0.2-16    glue_1.3.1         
+[70] evaluate_0.14       data.table_1.12.6   modelr_0.1.5       
+[73] vctrs_0.2.0         nloptr_1.2.1        cellranger_1.1.0   
+[76] gtable_0.3.0        purrr_0.3.3         tidyr_1.0.0        
+[79] assertthat_0.2.1    xfun_0.16           openxlsx_4.1.3     
+[82] xtable_1.8-4        broom_0.5.2         coda_0.19-3        
+[85] survival_2.44-1.1   viridisLite_0.3.0   tibble_2.1.3       
+[88] TH.data_1.0-10     </code></pre>
 </div>
 
 

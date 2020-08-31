@@ -51,7 +51,7 @@ options(scipen = 999)
 
 # Set figure theme and colors
 my_figure_theme <- theme_apa(base_size = 11) +
-  theme(legend.position = "top", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
+  theme(legend.position = "bottom", axis.ticks.x = element_blank(), axis.title.y = element_text(vjust = -0.5))
 
 my_figure_colors <- c("#8ea6b4", "#465369")
 
@@ -115,12 +115,12 @@ excluded_trials <- single_trial_data %>%
   dplyr::summarize(
     below_100_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt < 100) / length(participant_id) * 100,
     above_700_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt > 700) / length(participant_id) * 100,
-    gng_misses     = sum(gng_response_type == "miss") / length(participant_id) * 100,
+    gng_misses     = sum(gng_response_type == "miss")      / length(participant_id) * 100,
     gng_wrong_key  = sum(gng_response_type == "wrong_key") / length(participant_id) * 100,
     outlier_pos    = sum(!is.na(word_rt_outlier) & word_rt_outlier != FALSE & word_valence == "pos") / length(participant_id) * 100,
     outlier_neg    = sum(!is.na(word_rt_outlier) & word_rt_outlier != FALSE & word_valence == "neg") / length(participant_id) * 100,
-    word_misses    = sum(word_accuracy == "miss") / length(participant_id) * 100,
-    word_wrong_key = sum(word_accuracy == "wrong_key") / length(participant_id) * 100
+    word_misses    = sum(word_accuracy == "miss")          / length(participant_id) * 100,
+    word_wrong_key = sum(word_accuracy == "wrong_key")     / length(participant_id) * 100
   ) %>% 
   # Calculate M and SD of the variables
   dplyr::summarise_each(list(mean,sd), -participant_id)
@@ -145,7 +145,7 @@ my_table_template(table_excluded_trials,
 ***
 ### Means and CIs
 
-This table corresponds to Table S2 in the Supplemental Material.  
+This table corresponds to Table S2 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -208,9 +208,9 @@ my_table_template(descriptive_statistics[c(8, 7, 4, 3, 2, 1, 6, 5), ],
 
 ### Plot
 
-This figure corresponds to Figure 2 in the paper.  
+This figure corresponds to Figure 2 in the manuscript.  
 
-```{r descriptive-statistics-plot, fig.cap = "Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of previous response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by (Morey, 2008)"}
+```{r descriptive-statistics-plot, fig.cap = "Note. (A) RT and (B) accuracy in the word categorization task are shown as a function of preceding response type and word valence. Error bars represent 95% confidence intervals adjusted for within-participant designs as described by Morey (2008). Asterisks refer to significant differences based on linear mixed-effects model analysis."}
 
 # Create plot RT
 plot_rt <- ggplot(descriptive_statistics_rt, 
@@ -305,9 +305,8 @@ FH time: *M* = `r FH_time_mean` ms, *SD* = `r FH_time_sd` ms
 ## (G)LMM Analyses
 ***
 
-To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. 
-Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. 
-The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).
+To evaluate whether word categorization was faster and more accurate for words that were affectively congruent to the preceding action in the go/no-go task, word categorization RT and accuracy were modeled using a linear mixed-effects model (LMM) and a binomial generalized linear mixed-effects model (GLMM), respectively. In both models, response type of the preceding go/no-go response (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative) were specified as fixed factors and participants and word stimuli as random factors. <br><br>
+Fixed effects were coded using sliding difference contrasts, such that the intercept reflects the grand mean across all conditions and differences in means of adjacent factor levels (e.g., false alarm minus fast hit) are tested. The random-effects structure for each model was determined based on the procedure proposed by Bates, Kliegl, et al. (2015). We started with the maximal random-effects structure, including random intercepts for participants and word stimuli, as well as random slopes for all fixed factors and their interactions. If the model with the maximal random-effects structure would not converge, correlations of the random terms were set to zero. We performed a principal components analysis on the random-effects variance–covariance estimates to determine the number of components supported by the data and removed random effects explaining zero variance to prevent overparametrization (Matuschek et al., 2017).
 
 ```{r RT-accuracy-(G)LMM-contrast-coding}
 
@@ -463,7 +462,7 @@ As the model with the maximal random-effects structure did not converge, correla
 
 ##### LMM
 
-This table corresponds to Table 2 in the paper. 
+This table corresponds to Table 2 in the manuscript. 
 
 ```{r RT-LMM-final-model, cache = TRUE}
 
@@ -503,7 +502,7 @@ Crucially, the analysis further yielded the predicted interaction between respon
 
 ##### GLMM
 
-This table corresponds to Table S3 in the Supplemental Material. 
+This table corresponds to Table S3 in the supplemental material. 
 
 ```{r RT-GLMM-final-model, cache = TRUE}
 
@@ -546,7 +545,7 @@ The GLMM analysis yielded the same pattern of results concerning the predicted i
 
 We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
 <br><br>
-This table corresponds to Table 2 in the paper.  
+This table corresponds to Table 2 in the manuscript.  
 
 ```{r RT-LMM-nested-model, cache = TRUE}
 
@@ -575,7 +574,7 @@ Following false alarms, participants categorized negative words faster than posi
 
 We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. 
 <br><br>
-This table corresponds to Table S3 in the Supplemental Material.
+This table corresponds to Table S3 in the supplemental material.
 
 ```{r RT-GLMM-nested-model, cache = TRUE}
 
@@ -634,7 +633,7 @@ control = glmerControl(optimizer = "bobyqa")
 
 
 # Check model output
-summary(GLMM_acc_red1) # Model does converge but singular fit
+summary(GLMM_acc_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
@@ -649,7 +648,7 @@ As the model with the maximal random-effects structure did not converge, correla
 
 #### Run final model
 
-This table corresponds to Table 2 in the paper. 
+This table corresponds to Table 2 in the manuscript. 
 
 ```{r accuracy-GLMM-final-model, cache = TRUE}
 
@@ -690,7 +689,7 @@ The analysis yielded an interaction between response type and word valence, whic
 
 We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
 <br><br>
-This table corresponds to Table 2 in the paper. 
+This table corresponds to Table 2 in the manuscript. 
 ```{r accuracy-GLMM-nested-model, cache = TRUE}
 
 #### 4) Run model with the effect of word valence nested within each response type
@@ -716,7 +715,7 @@ Following false alarms, participants categorized negative words more accurately 
 
 ## ANOVAs
 ***
-To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the Supplemental Material.
+To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the supplemental material.
 
 ```{r ANOVAs}
 
@@ -823,7 +822,7 @@ knitr::kables(
 ***
 Aarts, K., De Houwer, J., & Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. *Cognition, 124*(2), 117-127. https://doi.org/10.1016/j.cognition.2012.05.009 <br><br> 
 Aarts, K., De Houwer, J., & Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. *Emotion, 13*(5), 960-973. https://doi.org/10.1037/a0032808s <br><br>
-Bakeman, R  (2005). Recommended effect size statistics for repeated measures designs. *Behavior Research Methods, 37*(3), 379–384. https://doi.org/10.3758/BF03192707
+Bakeman, R  (2005). Recommended effect size statistics for repeated measures designs. *Behavior Research Methods, 37*(3), 379–384. https://doi.org/10.3758/BF03192707  <br><br>
 Balota, D. A., Aschenbrenner, A. J., & Yap, M. J. (2013). Additive effects of word frequency and stimulus quality: The influence of trial history and data transformations. *Journal of Experimental Psychology: Learning, Memory, and Cognition, 39*(5), 1563-1571. https://doi.org/10.1037/a0032186 <br><br>
 Bates, D., Kliegl, R., Vasishth, S., & Baayen, H. (2015). *Parsimonious mixed models.* arXiv. https://arxiv.org/abs/1506.04967v2 <br><br>
 Box, G. E., & Cox, D. R. (1964). An analysis of transformations. *Journal of the Royal Statistical Society: Series B (Methodological), 26*(2), 211-243. https://doi.org/10.1111/j.2517-6161.1964.tb00553.x <br><br>
