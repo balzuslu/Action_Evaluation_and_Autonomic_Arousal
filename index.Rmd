@@ -19,12 +19,12 @@ knitr::opts_chunk$set(
 rm(list = ls())
 ```
 
-<!-- Load README.md file containing data description -->
+<!-- Load Task_and_Data_Description.md file containing task and data description -->
 
 ```{r data-description} 
 
 # Load markdown file that contains the task and data description
-filename         <- "README.md"
+filename         <- "Task_and_Data_Description.md"
 data_description <- readChar(filename, file.info(filename)$size, )
 ```
 
