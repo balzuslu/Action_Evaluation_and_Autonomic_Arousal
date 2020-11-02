@@ -22,6 +22,10 @@ knitr::opts_chunk$set(
 rm(list = ls())
 
 
+# Enable/disable caching of time-consuming code chunks
+knitr_cache_enabled = TRUE
+
+
 # Load packages
 library(dplyr)      # for data manipulation
 library(knitr)      # for integrating computing and reporting in markdown
@@ -464,7 +468,7 @@ As the model with the maximal random-effects structure did not converge, correla
 
 This table corresponds to Table 2 in the manuscript. 
 
-```{r RT-LMM-final-model}
+```{r RT-LMM-final-model, cache = knitr_cache_enabled}
 
 #### 3) Run final model without random terms explaining zero variance (i.e., remove IR_FA for word stimuli)
 LMM_rt_final <- lmer(word_rt_inverse ~ gng_response_type * word_valence +
@@ -504,7 +508,7 @@ Crucially, the analysis further yielded the predicted interaction between respon
 
 This table corresponds to Table S3 in the supplemental material. 
 
-```{r RT-GLMM-final-model}
+```{r RT-GLMM-final-model, cache = knitr_cache_enabled}
 
 #### 3) Run final model without random term with least variance to achieve convergence (i.e., remove FA - FH for word stimuli)
 GLMM_rt_final <- glmer(word_rt ~ gng_response_type * word_valence +
@@ -547,7 +551,7 @@ We followed up interactions by reparametrizing the fixed-effects part of the mod
 <br><br>
 This table corresponds to Table 2 in the manuscript.  
 
-```{r RT-LMM-nested-model}
+```{r RT-LMM-nested-model, cache = knitr_cache_enabled}
 
 #### 4) Run model with the effect of word valence nested within each response type
 LMM_rt_nested <- lmer(word_rt_inverse ~ gng_response_type / word_valence +
@@ -576,7 +580,7 @@ We followed up interactions by reparametrizing the fixed-effects part of the mod
 <br><br>
 This table corresponds to Table S3 in the supplemental material.
 
-```{r RT-GLMM-nested-model}
+```{r RT-GLMM-nested-model, cache = knitr_cache_enabled}
 
 #### 4) Run model with the effect of word valence nested within each response type
 GLMM_rt_nested <- glmer(word_rt ~ gng_response_type / word_valence +
@@ -650,7 +654,7 @@ As the model with the maximal random-effects structure did not converge, correla
 
 This table corresponds to Table 2 in the manuscript. 
 
-```{r accuracy-GLMM-final-model}
+```{r accuracy-GLMM-final-model, cache = knitr_cache_enabled}
 
 #### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH for participants)
 GLMM_acc_final <- glmer(word_accuracy_numeric ~ gng_response_type * word_valence +
@@ -690,7 +694,7 @@ The analysis yielded an interaction between response type and word valence, whic
 We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
 <br><br>
 This table corresponds to Table 2 in the manuscript. 
-```{r accuracy-GLMM-nested-model}
+```{r accuracy-GLMM-nested-model, cache = knitr_cache_enabled}
 
 #### 4) Run model with the effect of word valence nested within each response type
 GLMM_acc_nested <- glmer(word_accuracy_numeric ~ gng_response_type / word_valence +

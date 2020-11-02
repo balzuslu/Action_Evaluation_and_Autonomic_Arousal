@@ -22,6 +22,10 @@ knitr::opts_chunk$set(
 rm(list = ls())
 
 
+# Enable/disable caching of time-consuming code chunks
+knitr_cache_enabled = TRUE
+
+
 # Load packages
 library(dplyr)      # for data manipulation
 library(knitr)      # for integrating computing and reporting in markdown
@@ -440,7 +444,7 @@ As the model with the maximal random-effects structure did not converge, correla
 
 This table corresponds to Table 3 in the manuscript. 
 
-```{r SCR-priming-LMM-final-model}
+```{r SCR-priming-LMM-final-model, cache = knitr_cache_enabled}
 
 #### 3) Run final model without random terms explaining zero variance 
 # (i.e., remove all interaction terms involving the factor SCR)
@@ -484,7 +488,7 @@ We followed up this interaction by reparametrizing the fixed-effects part of the
 <br><br>
 This table corresponds to Table 3 in the manuscript.  
 
-```{r SCR-priming-LMM-nested-model}
+```{r SCR-priming-LMM-nested-model, cache = knitr_cache_enabled}
 
 #### 4) Run model with the effect of word valence * scr nested within each response type
 LMM_scr_priming_nested <- lmer(word_rt_inverse ~ gng_response_type / (word_valence * iscr_gng_resp_sqrt_z) +
@@ -516,7 +520,7 @@ Only for false alarms, but not for the other response types, an enhanced SCR was
 
 The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. 
 
-```{r plot-pes-scr-original, fig.cap = "Note. Error bars indicate 95% confidence intervals."}
+```{r plot-pes-scr-original, cache = knitr_cache_enabled, fig.cap = "Note. Error bars indicate 95% confidence intervals."}
 
 # Respecify LMM without interactions stated with ":" in random structure (because plot_model does not like that) 
 # Also enter fixed effects as factors, not contrasts (to have all factor levels in the plot)
