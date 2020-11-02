@@ -5,7 +5,7 @@ Thirty participants performed an affective priming paradigm, consisting of a go/
 In this repository, we provide data and scripts used for statistical analyses and figure generation. For information about task and data, please read the Task_and_Data_Description.md.<br><br>
 
 **For our project page with analysis code and output for performed analyses please visit**
-https://balzuslu.github.io/action_evaluation_and_autonomic_arousal
+https://balzuslu.github.io/action_evaluation_and_autonomic_arousal<br><br>
 
 
 
@@ -17,15 +17,15 @@ Analyses were conducted with R version 3.6.1 and R Studio version 1.2.5001.<br><
 
 ## Analysis Scripts
 
-- 1_Word_Categorization.Rmd: This script performs the analysis of behavioral performance in the word categorization task, including data cleaning, descriptive statistics, figure generation, (G)LMM analyses, and ANOVAs (= supplementary analyses).
-- 2_Go_No-Go.Rmd: This script performs the analysis of behavioral performance in the go/no-go task, including data cleaning, descriptive statistics, and LMM analysis.
-- 3_SCR.Rmd: This script performs the analysis of the skin conductance response and its trial-level relation to affective action evaluation, including data cleaning, descriptive statistics, figure generation, LMM analyses, and control analyses (= supplementary analyses).<br><br>
+- **1_Word_Categorization.Rmd**: This script performs the analysis of behavioral performance in the word categorization task, including data cleaning, descriptive statistics, figure generation, (G)LMM analyses, and ANOVAs (= supplementary analyses).
+- **2_Go_No-Go.Rmd**: This script performs the analysis of behavioral performance in the go/no-go task, including data cleaning, descriptive statistics, and LMM analysis.
+- **3_SCR.Rmd**: This script performs the analysis of the skin conductance response and its trial-level relation to affective action evaluation, including data cleaning, descriptive statistics, figure generation, LMM analyses, and control analyses (= supplementary analyses).<br><br>
 
 
 
 ## Usage
 
-To reproduce statistical analyses, clone the project repository and run renv::restore() to automatically install all required packages into the project library.
+To reproduce statistical analyses, clone the project repository and run `renv::restore()` to automatically install all required packages into the project library.
 
 
 
