@@ -356,7 +356,7 @@ div.tocify {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">
+  <a href="0_Task_and_Data_Description.html">
     <span class="glyphicon glyphicon-info-sign"></span>
      
     Task &amp; Data
@@ -481,13 +481,15 @@ descriptive_statistics_proportion &lt;- as.data.frame(t(stat.desc(descriptive_st
 descriptive_statistics &lt;- full_join(descriptive_statistics_rt, descriptive_statistics_proportion,
   by = &quot;gng_response_type&quot;
 ) %&gt;%
-  # Round numeric values to two decimals
-  dplyr::mutate_if(is.numeric, round, digits = 2) %&gt;%
   # Format confidence interval column
   dplyr::mutate(
-    ci_rt         = paste0(&quot;[&quot;, gng_rt - ci,           &quot;, &quot;, gng_rt + ci, &quot;]&quot;),
-    ci_proportion = paste0(&quot;[&quot;, mean   - CI.mean.0.95, &quot;, &quot;, mean   + CI.mean.0.95, &quot;]&quot;)
+    ci_rt         = paste0(&quot;[&quot;, round(gng_rt - ci, digits = 0),
+                           &quot;, &quot;, round(gng_rt + ci, digits = 0), &quot;]&quot;),
+    ci_proportion = paste0(&quot;[&quot;, round(mean   - CI.mean.0.95, digits = 2),
+                           &quot;, &quot;, round(mean   + CI.mean.0.95, digits = 2), &quot;]&quot;)
   ) %&gt;%
+  # Round RT means to zero decimals
+  dplyr::mutate_at(&quot;gng_rt&quot;, round, digits = 0) %&gt;%  
   # Select columns to be displayed
   dplyr::select(c(&quot;gng_response_type&quot;, &quot;gng_rt&quot;, &quot;ci_rt&quot;, &quot;mean&quot;, &quot;ci_proportion&quot;))
 
@@ -542,10 +544,10 @@ M
 SH
 </td>
 <td style="text-align:right;">
-342.16
+342
 </td>
 <td style="text-align:left;">
-[339.96, 344.36]
+[340, 344]
 </td>
 <td style="text-align:right;">
 40.39
@@ -559,10 +561,10 @@ SH
 FH
 </td>
 <td style="text-align:right;">
-270.47
+270
 </td>
 <td style="text-align:left;">
-[268.69, 272.25]
+[269, 272]
 </td>
 <td style="text-align:right;">
 25.92
@@ -576,10 +578,10 @@ FH
 FA
 </td>
 <td style="text-align:right;">
-260.43
+260
 </td>
 <td style="text-align:left;">
-[256.8, 264.06]
+[257, 264]
 </td>
 <td style="text-align:right;">
 10.91
@@ -997,7 +999,7 @@ Observations
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.6.1 (2019-07-05)
 Platform: x86_64-w64-mingw32/x64 (64-bit)
-Running under: Windows 10 x64 (build 18362)
+Running under: Windows 10 x64 (build 18363)
 
 Matrix products: default
 

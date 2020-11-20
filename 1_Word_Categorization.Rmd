@@ -189,13 +189,15 @@ descriptive_statistics_accuracy <- summarySEwithinO(
 descriptive_statistics <- full_join(descriptive_statistics_rt, descriptive_statistics_accuracy,
   by = c("gng_response_type", "word_valence")
 ) %>%
-  # Round numeric values to two decimals
-  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
   # Format confidence interval column
   dplyr::mutate(
-    ci_rt       = paste0("[", word_rt - ci.x, ", ", word_rt + ci.x, "]"),
-    ci_accuracy = paste0("[", word_accuracy_numeric - ci.y, ", ", word_accuracy_numeric + ci.y, "]")
+    ci_rt       = paste0("[", round(word_rt - ci.x, digits = 0), 
+                         ", ", round(word_rt + ci.x, digits = 0), "]"),
+    ci_accuracy = paste0("[", round(word_accuracy_numeric - ci.y, digits = 2), 
+                         ", ", round(word_accuracy_numeric + ci.y, digits = 2), "]")
   ) %>%
+  # Round RT means to zero decimals
+  dplyr::mutate_at("word_rt", round, digits = 0) %>%  
   # Select columns to be displayed
   dplyr::select(c("gng_response_type", "word_valence", "word_rt", "ci_rt", "word_accuracy_numeric", "ci_accuracy"))
 
@@ -299,8 +301,8 @@ FH_time <- single_trial_data_priming %>%
   )
 
 
-FH_time_mean <- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 2)
-FH_time_sd   <- round((sd(FH_time$FH_1)   + sd(FH_time$FH_2)   + sd(FH_time$FH_3))   / 3, digits = 2)
+FH_time_mean <- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 0)
+FH_time_sd   <- round((sd(FH_time$FH_1)   + sd(FH_time$FH_2)   + sd(FH_time$FH_3))   / 3, digits = 0)
 ```
 
 FH time: *M* = `r FH_time_mean` ms, *SD* = `r FH_time_sd` ms

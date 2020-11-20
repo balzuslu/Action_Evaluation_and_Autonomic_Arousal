@@ -114,13 +114,15 @@ descriptive_statistics_proportion <- as.data.frame(t(stat.desc(descriptive_stati
 descriptive_statistics <- full_join(descriptive_statistics_rt, descriptive_statistics_proportion,
   by = "gng_response_type"
 ) %>%
-  # Round numeric values to two decimals
-  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
   # Format confidence interval column
   dplyr::mutate(
-    ci_rt         = paste0("[", gng_rt - ci,           ", ", gng_rt + ci, "]"),
-    ci_proportion = paste0("[", mean   - CI.mean.0.95, ", ", mean   + CI.mean.0.95, "]")
+    ci_rt         = paste0("[", round(gng_rt - ci, digits = 0),
+                           ", ", round(gng_rt + ci, digits = 0), "]"),
+    ci_proportion = paste0("[", round(mean   - CI.mean.0.95, digits = 2),
+                           ", ", round(mean   + CI.mean.0.95, digits = 2), "]")
   ) %>%
+  # Round RT means to zero decimals
+  dplyr::mutate_at("gng_rt", round, digits = 0) %>%  
   # Select columns to be displayed
   dplyr::select(c("gng_response_type", "gng_rt", "ci_rt", "mean", "ci_proportion"))
 
