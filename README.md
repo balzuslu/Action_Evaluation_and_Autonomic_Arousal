@@ -2,9 +2,10 @@
 
 This repository contains data and code for the study "Feeling Bad About Being Wrong: Affective Evaluation of Performed Actions and its Trial-by-Trial Relation to Autonomic Arousal" by Luisa Balzus, Julia Klawohn, and Norbert Kathmann.    
 
+<br />
+
+<div><br /></div>
   
-
-
 ## Overview
 
 Our study aimed to replicate and extend previous findings on affective action evaluation and to examine trial-level associations between action evaluation and autonomic arousal. 
