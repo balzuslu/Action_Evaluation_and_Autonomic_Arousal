@@ -2,9 +2,7 @@
 
 This repository contains data and code for the study "Feeling Bad About Being Wrong: Affective Evaluation of Performed Actions and its Trial-by-Trial Relation to Autonomic Arousal" by Luisa Balzus, Julia Klawohn, and Norbert Kathmann.    
 
-<br />
-
-<div><br /></div>
+&nbsp;
   
 ## Overview
 
@@ -13,11 +11,10 @@ Thirty participants performed an affective priming paradigm, consisting of a go/
 In this repository, we provide data and scripts used for statistical analyses and figure generation. For information about task and data, please read the Task_and_Data_Description.md.  
 
 **For our project page with analysis code and results of statistical analyses please visit**
-<https://balzuslu.github.io/action_evaluation_and_autonomic_arousal>   
-
-  
-
-
+<https://balzuslu.github.io/action_evaluation_and_autonomic_arousal>/
+/
+/
+/
 ## Software Information
 
 Analyses were conducted with R version 3.6.1 and R Studio version 1.2.5001.    
