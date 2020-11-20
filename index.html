@@ -12,7 +12,7 @@
 
 
 
-<title>Task &amp; Data Description</title>
+<title>index.utf8.md</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -20,9 +20,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -258,69 +255,6 @@ $(document).ready(function () {
 
 
 
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-.tocify-subheader {
-  display: inline;
-}
-.tocify-subheader .tocify-item {
-  font-size: 0.95em;
-}
-
-</style>
-
-
 
 </head>
 
@@ -328,16 +262,6 @@ div.tocify {
 
 
 <div class="container-fluid main-container">
-
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -355,7 +279,7 @@ div.tocify {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">
+  <a href="0_Task_and_Data_Description.html">
     <span class="glyphicon glyphicon-info-sign"></span>
      
     Task &amp; Data
@@ -407,189 +331,29 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Task &amp; Data Description</h1>
 
 </div>
 
 
-<!-- Set general settings -->
-<!-- Load Task_and_Data_Description.md file containing task and data description -->
-<pre class="r"><code># Load markdown file that contains the task and data description
-filename         &lt;- &quot;Task_and_Data_Description.md&quot;
-data_description &lt;- readChar(filename, file.info(filename)$size, )</code></pre>
-<!--
-Task and Data Description
--->
-<div id="task" class="section level2">
-<h2>Task</h2>
-<ul>
-<li>Participants performed an affective priming task that comprised a speeded go/no-go task with an embedded word categorization task. Responses in the go/no-go task served as a primes, the subsequently presented affective words as targets. Response facilitation in the word categorization task when preceded by an action in the go/no-go task of the same assigned valence will be referred to as affective priming effect. We assessed participants’ accuracy and response time (RT) in the go/no-go task and the word categorization task.<br><br></li>
-<li>Go/no-go Task
-<ul>
-<li>A white arrow pointing upward or downward either turned
-<ul>
-<li>green and kept its initial orientation (2/3 of the trials; go trials)</li>
-<li>turquoise and kept its orientation (1/6 of the trials; no-go trials), or</li>
-<li>green but reversed its orientation (1/6 of the trials; no-go trials).<br><br></li>
-</ul></li>
-<li>Participants were instructed to respond to go trials, but not to no-go trials.<br><br></li>
-<li>Four response types in the go/no-go task were differentiated:
-<ul>
-<li>SH: slow hits (i.e., correct responses in go trials above the individual RT limit)</li>
-<li>FH: fast hits (i.e., correct responses in go trials below the individual RT limit)</li>
-<li>FA: false alarms (i.e., erroneous responses in no-go trials)</li>
-<li>IR: inhibited responses (i.e., successful response inhibitions in no-go trials)<br><br></li>
-</ul></li>
-</ul></li>
-<li>Word categorization task
-<ul>
-<li>After each go/no-go trial, an affective word was presented, which the participants were asked to categorize as either positive or negative.</li>
-<li>We predicted that after false alarms in no-go trials, participants would respond faster and more accurately to negative words than to positive words. After fast hits in go trials, participants were expected to respond faster to positive words than to negative words (Aarts et al., 2012, 2013).<br><br></li>
-</ul></li>
-<li>During the task, the skin conductance response (SCR) was recorded.
-<ul>
-<li>For statistical analyses, the integrated SCR (ISCR; Benedek &amp; Kaernbach, 2010) was extracted within a time window from 1 to 4 s after the participant’s response in the go/no-go task.</li>
-<li>We predicted that SCR and affective priming effect (see above) might either be positively related on a trial-by-trial level, as they are both manifestations of the emotional significance of an action (Aarts et al., 2013; Hajcak et al., 2003), or that error-related arousal might interfere with action evaluation, as has been observed for trait anxiety (Aarts et al., 2012).<br><br></li>
-</ul></li>
-</ul>
-</div>
-<div id="design" class="section level2">
-<h2>Design</h2>
-<ul>
-<li>4 x 2 design: go/no-go response type (SH, FH, FA, IR) and word valence (positive, negative) as within-participant factors<br><br></li>
-</ul>
-</div>
-<div id="data-description" class="section level2">
-<h2>Data Description</h2>
-<ul>
-<li>Data set: ‘Single_Trial_Data.rda’</li>
-<li>15480 observations (30 participants, 516 trials per participant), 16 variables<br><br></li>
-</ul>
-<table>
-<colgroup>
-<col width="10%" />
-<col width="45%" />
-<col width="43%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>VARIABLE</th>
-<th>DESCRIPTION</th>
-<th>VALUES</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>participant_id</td>
-<td>Participant identifier</td>
-<td>1 to 30</td>
-</tr>
-<tr class="even">
-<td>trial</td>
-<td>Trial number within the task</td>
-<td>1 to 516 per participant</td>
-</tr>
-<tr class="odd">
-<td>block</td>
-<td>Experimental block</td>
-<td>1 to 9 per participant</td>
-</tr>
-<tr class="even">
-<td>gng_response_type</td>
-<td>Response type in the go/no-go task</td>
-<td>SH = slow hit <br> FH = fast hit <br> FA = false alarm <br> IR = inhibited response <br> miss = missing response in go trial <br> wrong_key = response made with a word categorization key</td>
-</tr>
-<tr class="odd">
-<td>gng_rt</td>
-<td>RT in the go/no-go task</td>
-<td>RT in milliseconds <br> NAs for trials in which no response was made (IR, miss)</td>
-</tr>
-<tr class="even">
-<td>gng_rt_invalid</td>
-<td>Indication whether RT in the go/no-go task was &lt; 100 ms or &gt; 700 ms</td>
-<td>TRUE <br> FALSE <br> NAs for trials in which no response was made (IR, miss)</td>
-</tr>
-<tr class="odd">
-<td>gng_rt_inverse</td>
-<td>Inverse-transformed RT in the go/no-go task</td>
-<td>-1000/RT in milliseconds <br> NAs for trials in which no response was made (IR, miss)</td>
-</tr>
-<tr class="even">
-<td>word</td>
-<td>Affective word presented in the word categorization task</td>
-<td>60 German words (30 positive, 30 negative) from the Berlin Affective Word List Reloaded (Vo et al., 2009)</td>
-</tr>
-<tr class="odd">
-<td>word_valence</td>
-<td>Valence of the affective word</td>
-<td>pos = positive <br> neg = negative</td>
-</tr>
-<tr class="even">
-<td>word_accuracy</td>
-<td>Correctness of the word categorization</td>
-<td>correct = correct categorization <br> incorrect = incorrect categorization <br> miss = missing response <br> wrong_key = response made with the go/no-go key</td>
-</tr>
-<tr class="odd">
-<td>word_rt</td>
-<td>RT in the word categorization task</td>
-<td>RT in milliseconds <br> NAs for trials in which no response was made (miss)</td>
-</tr>
-<tr class="even">
-<td>word_rt_outlier</td>
-<td>Indication whether RT in the word categorization task was &gt; 3 median absolute deviations (MAD) above or below a participant’s median RT per specific condition (gng_response_type x word_valence)</td>
-<td>TRUE <br> FALSE <br> NAs for trials in which no response was made (miss)</td>
-</tr>
-<tr class="odd">
-<td>word_rt_inverse</td>
-<td>Inverse-transformed RT in the word categorization task</td>
-<td>-1000/RT in milliseconds <br> NAs for trials in which no response was made (miss)</td>
-</tr>
-<tr class="even">
-<td>iscr_gng_resp</td>
-<td>Integrated SCR extracted within a time window from 1 to 4 s after the response in the go/no-go task</td>
-<td>ISCR in microsiemens</td>
-</tr>
-<tr class="odd">
-<td>trial_followed_or_preceded_<br>by_any_incorr_resp</td>
-<td>Indication whether trial was followed / preceded by any incorrect response in the go/no-go or the word categorization task</td>
-<td>TRUE <br> FALSE</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="references" class="section level2">
-<h2>References</h2>
-<p>Aarts, K., De Houwer, J., &amp; Pourtois, G. (2012). Evidence for the automatic evaluation of self-generated actions. <em>Cognition, 124</em>(2), 117-127. <a href="https://doi.org/10.1016/j.cognition.2012.05.009" class="uri">https://doi.org/10.1016/j.cognition.2012.05.009</a> <br><br> Aarts, K., De Houwer, J., &amp; Pourtois, G. (2013). Erroneous and correct actions have a different affective valence: Evidence from ERPs. <em>Emotion, 13</em>(5), 960-973. <a href="https://doi.org/10.1037/a0032808s" class="uri">https://doi.org/10.1037/a0032808s</a> <br><br> Benedek, M., &amp; Kaernbach, C. (2010). A continuous measure of phasic electrodermal activity. <em>Journal of Neuroscience Methods, 190</em>(1), 80-91. <a href="https://doi.org/10.1016/j.jneumeth.2010.04.028" class="uri">https://doi.org/10.1016/j.jneumeth.2010.04.028</a> <br><br> Hajcak, G., McDonald, N., &amp; Simons, R. F. (2003). To err is autonomic: Error-related brain potentials, ANS activity, and post-error compensatory behavior. <em>Psychophysiology, 40</em>(6), 895-903. <a href="https://doi.org/10.1111/1469-8986.00107" class="uri">https://doi.org/10.1111/1469-8986.00107</a> <br><br> Vo, M. L., Conrad, M., Kuchinke, L., Urton, K., Hofmann, M. J., &amp; Jacobs, A. M. (2009). The Berlin Affective Word List Reloaded (BAWL-R). <em>Behavior Research Methods, 41</em>(2), 534-538. <a href="https://doi.org/10.3758/BRM.41.2.534" class="uri">https://doi.org/10.3758/BRM.41.2.534</a></p>
-<p><br><br></p>
-</div>
-<div id="session-info" class="section level2">
-<h2>Session Info</h2>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R version 3.6.1 (2019-07-05)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 18362)
-## 
-## Matrix products: default
-## 
-## locale:
-## [1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252   
-## [3] LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
-## [5] LC_TIME=German_Germany.1252    
-## 
-## attached base packages:
-## [1] stats     graphics  grDevices datasets  utils     methods   base     
-## 
-## loaded via a namespace (and not attached):
-##  [1] compiler_3.6.1  magrittr_1.5    htmltools_0.4.0 tools_3.6.1    
-##  [5] yaml_2.2.0      Rcpp_1.0.5      stringi_1.4.3   rmarkdown_1.16 
-##  [9] knitr_1.29      stringr_1.4.0   xfun_0.16       digest_0.6.22  
-## [13] rlang_0.4.8     renv_0.12.0     evaluate_0.14</code></pre>
+<p><br><br><br><br></p>
+<center>
+<div id="action-evaluation-and-autonomic-arousal" class="section level1">
+<h1>Action Evaluation and Autonomic Arousal</h1>
+<p><br></p>
+<hr />
+<p><br></p>
+<p>This site contains analysis code and statistical analyses results from the follwing study: <br><br></p>
+<p><font size="4"><strong>Feeling Bad About Being Wrong: Affective Evaluation of Performed Actions and its Trial-by-Trial Relation to Autonomic Arousal</strong></font> <br><br></p>
+<p>by Luisa Balzus, Julia Klawohn, and Norbert Kathmann</p>
+<p><br></p>
+<hr />
+<p><br></p>
+<p>Data and code to reproduce statistical analyses are available at <br> <a href="https://github.com/balzuslu/action_evaluation_and_autonomic_arousal" class="uri">https://github.com/balzuslu/action_evaluation_and_autonomic_arousal</a>.</p>
+<center>
 </div>
 
 
 
-</div>
-</div>
 
 </div>
 
@@ -627,32 +391,6 @@ $(document).ready(function () {
 });
 </script>
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3,h4",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = false;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

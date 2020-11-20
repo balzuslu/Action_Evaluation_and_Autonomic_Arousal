@@ -9,7 +9,7 @@ navbar:
   left:
     - text: "Task & Data"
       icon: glyphicon-info-sign
-      href: index.html
+      href: 0_Task_and_Data_Description.html
     - text: "Word Categorization Task"
       icon: glyphicon glyphicon-hand-up
       href: 1_Word_Categorization.html

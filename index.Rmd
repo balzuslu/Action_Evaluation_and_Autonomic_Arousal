@@ -1,39 +1,33 @@
 ---
-title: "Task & Data Description"
 output: 
-  html_document
+  html_document:
+    toc: false
 ---
+<br><br><br><br>
 
-<!-- Set general settings -->
+<center>
+# Action Evaluation and Autonomic Arousal
+<br>
 
-```{r setup, message = FALSE, warning = FALSE, echo = FALSE}
+****
 
-# Set general settings for markdown file
-knitr::opts_chunk$set(
-  message = FALSE,
-  warning = FALSE
-)
+<br>
 
-
-# Clear environment
-rm(list = ls())
-```
-
-<!-- Load Task_and_Data_Description.md file containing task and data description -->
-
-```{r data-description} 
-
-# Load markdown file that contains the task and data description
-filename         <- "Task_and_Data_Description.md"
-data_description <- readChar(filename, file.info(filename)$size, )
-```
-
-`r data_description`
+This site contains analysis code and statistical analyses results from the follwing study:
 <br><br>
 
-## Session Info
+<font size="4">**Feeling Bad About Being Wrong: Affective  Evaluation of Performed Actions and its Trial-by-Trial Relation to Autonomic Arousal**</font>
+<br><br>
 
-```{r session-info, results = TRUE}
+by Luisa Balzus, Julia Klawohn, and Norbert Kathmann
 
-sessionInfo()
-```
+<br>
+
+****
+
+<br>
+
+Data and code to reproduce statistical analyses are available at <br> 
+https://github.com/balzuslu/action_evaluation_and_autonomic_arousal.
+
+<center>
