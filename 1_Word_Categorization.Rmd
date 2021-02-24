@@ -149,7 +149,7 @@ my_table_template(table_excluded_trials,
 ***
 ### Means and CIs
 
-This table corresponds to Table S2 in the supplemental material.  
+This table corresponds to Table S6 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -508,7 +508,7 @@ Crucially, the analysis further yielded the predicted interaction between respon
 
 ##### GLMM
 
-This table corresponds to Table S3 in the supplemental material. 
+This table corresponds to Table S7 in the supplemental material. 
 
 ```{r RT-GLMM-final-model, cache = knitr_cache_enabled}
 
@@ -543,6 +543,86 @@ print("Random effects:")
 print(VarCorr(GLMM_rt_final), digits = 1, comp = "Std.Dev.")
 ```
 The GLMM analysis yielded the same pattern of results concerning the predicted interaction between response type and word valence as the LMM analysis of inverse-transformed RT data. 
+<br><br><br>
+
+##### LMM with valence-to-key mapping
+
+An additional analysis was performed in which the mapping of valence to the horizontally arranged response keys was included as fixed factor in the LMM on word categorization RT. Thereby, we aimed to examine whether word categorization RT differed between the counterbalanced assignment of valence to keys (e.g., in our sample of right-handers, the right response key might have been associated with positive valence and the left with negative valence, leading to overall faster word categorization when positive valence was assigned to the right response key) and whether accounting for variance related to valence assignment to keys might affect the findings of the action-based priming effect.
+<br><br>
+This table corresponds to Table S8 in the supplemental material.
+
+```{r RT-LMM-with-valence-mapping, cache = knitr_cache_enabled}
+
+# Create variable for mapping of valence to keys
+single_trial_data_priming$key_mapping <- as.numeric(single_trial_data_priming$participant_id) %% 2 # odd participant IDs: pos is left
+
+
+# Relabel values 
+single_trial_data_priming[single_trial_data_priming$key_mapping == 0,]$key_mapping <- "pos_right"
+single_trial_data_priming[single_trial_data_priming$key_mapping == 1,]$key_mapping <- "pos_left"
+
+
+# Define contrasts (sliding difference contrasts)
+single_trial_data_priming$key_mapping            <- factor(single_trial_data_priming$key_mapping)
+contrasts(single_trial_data_priming$key_mapping) <- contr.sdif(2)
+
+
+# Add labels for LMM table
+labels_mapping <- c(labels,
+  "key_mapping2-1" = "Pos Right - Pos Left",
+  "gng_response_type2-1:key_mapping2-1" = "FH - SH x Pos Right - Pos Left",	
+  "gng_response_type3-2:key_mapping2-1" = "FA - FH x Pos Right - Pos Left",
+  "gng_response_type4-3:key_mapping2-1" = "IR - FA x Pos Right - Pos Left",
+  "word_valence2-1:key_mapping2-1" = "Pos - Neg x Pos Right - Pos Left",	
+  "gng_response_type2-1:word_valence2-1:key_mapping2-1" = "FH - SH x Pos - Neg x Pos Right - Pos Left",	
+  "gng_response_type3-2:word_valence2-1:key_mapping2-1" = "FA - FH x Pos - Neg x Pos Right - Pos Left",	
+  "gng_response_type4-3:word_valence2-1:key_mapping2-1" = "IR - FA x Pos - Neg x Pos Right - Pos Left",	
+  "gng_response_typeSH:key_mapping2-1" = "SH: Pos Right - Pos Left",
+  "gng_response_typeFH:key_mapping2-1" = "FH: Pos Right - Pos Left",
+  "gng_response_typeFA:key_mapping2-1" = "FA: Pos Right - Pos Left",
+  "gng_response_typeIR:key_mapping2-1" = "IR: Pos Right - Pos Left",
+  "gng_response_typeSH:key_mappingpos_left:word_valence2-1" = "SH: Pos Left: Pos - Neg",
+  "gng_response_typeFH:key_mappingpos_left:word_valence2-1" = "FH: Pos Left: Pos - Neg",
+  "gng_response_typeFA:key_mappingpos_left:word_valence2-1" = "FA: Pos Left: Pos - Neg",
+  "gng_response_typeIR:key_mappingpos_left:word_valence2-1" = "IR: Pos Left: Pos - Neg",
+  "gng_response_typeSH:key_mappingpos_right:word_valence2-1" = "SH: Pos Right: Pos - Neg",
+  "gng_response_typeFH:key_mappingpos_right:word_valence2-1" = "FH: Pos Right: Pos - Neg",
+  "gng_response_typeFA:key_mappingpos_right:word_valence2-1" = "FA: Pos Right: Pos - Neg",
+  "gng_response_typeIR:key_mappingpos_right:word_valence2-1" = "IR: Pos Right: Pos - Neg"
+)
+
+
+# Run model including assignment of valence to keys as factor
+LMM_rt_mapping <- lmer(word_rt_inverse ~ gng_response_type * word_valence * key_mapping +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = TRUE, 
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_rt_mapping) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_rt_mapping)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_mapping,
+  dv.labels = "RT", pred.labels = labels_mapping, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite", wrap.labels = 80
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_rt_mapping), digits = 1, comp = "Std.Dev.")
+```
+RT did not differ significantly between the counterbalanced assignment of valence to keys. Furthermore, this analysis yielded the same results concerning the priming effects following slow hits, fast hits, and false alarms (see below for following up the interactions). 
 <br><br><br>
 
 #### Follow up interactions {.tabset}
@@ -580,7 +660,7 @@ Following false alarms, participants categorized negative words faster than posi
 
 We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding comparable results in terms of response type main effects and model fit indices. 
 <br><br>
-This table corresponds to Table S3 in the supplemental material.
+This table corresponds to Table S7 in the supplemental material.
 
 ```{r RT-GLMM-nested-model, cache = knitr_cache_enabled}
 
@@ -603,6 +683,35 @@ tab_model(GLMM_rt_nested,
 ```
 <br>
 Following false alarms, participants categorized negative words faster than positive words. Following hits (fast hits; slow hits as statistical trend), participants categorized positive words faster than negative words. 
+<br><br><br>
+
+##### LMM with valence-to-key mapping
+
+We followed up interactions by reparametrizing the fixed-effects part of the model with the effect of word valence nested within each response type and valence-to-key mapping. Except for the nesting, the model was specified identically to the non-nested model, therefore yielding identical results in terms of response type main effects and model fit indices. 
+<br><br>
+This table corresponds to Table S8 in the supplemental material.
+
+```{r RT-LMM-with-valence-mapping-nested-model, cache = knitr_cache_enabled}
+
+# Run model including mapping of valence to keys as factor with the effect of word valence nested within each response type and key mapping
+LMM_rt_mapping_nested <- lmer(word_rt_inverse ~ gng_response_type / key_mapping / word_valence +
+  (1 + FH_SH + FA_FH + IR_FA + pos_neg + FH_SH:pos_neg + FA_FH:pos_neg + IR_FA:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH || word),
+data = single_trial_data_priming[single_trial_data_priming$word_accuracy == "correct", ],
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Display results (fixed effects)
+tab_model(LMM_rt_mapping_nested,
+  dv.labels = "RT", pred.labels = labels_mapping, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE, 
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value", 
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite", wrap.labels = 80
+)
+```
+<br>
+The priming effects were present for both valence-to-key mappings.
 <br><br><br>
 
 ### Accuracy
@@ -721,7 +830,7 @@ Following false alarms, participants categorized negative words more accurately 
 
 ## ANOVAs
 ***
-To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 5 in the supplemental material.
+To facilitate comparison with previously reported results obtained using a similar task and aggregation-based analyses (Aarts et al., 2012, 2013), word categorization RT and accuracy were additionally analyzed with Greenhouse–Geisser corrected repeated-measures analyses of variance (ANOVAs) including the within-participant factors response type (slow hit, fast hit, false alarm, inhibited response) and word valence (positive, negative). As can be seen below, the ANOVAs yielded the same results as obtained with mixed-effects modeling with respect to all main effects, interaction effects, and all pairwise comparisons. This analysis corresponds to page 10 in the supplemental material.
 
 ```{r ANOVAs}
 
