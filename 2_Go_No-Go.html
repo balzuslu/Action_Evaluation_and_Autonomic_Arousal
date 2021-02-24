@@ -422,6 +422,23 @@ div.tocify {
 load(file = &quot;./data/Single_Trial_Data.rda&quot;)
 
 
+# Create variables gng_accuracy (1 for hit, 0 for FA) and accuracy_prev_trial (use unfiltered data to make sure previous trial in table = previous trial in task)
+single_trial_data &lt;- single_trial_data %&gt;%
+  dplyr::mutate(
+    gng_accuracy = ifelse(gng_response_type == &quot;FH&quot; | gng_response_type == &quot;SH&quot;, 1,
+      ifelse(gng_response_type == &quot;FA&quot;, 0, NA)),
+    accuracy_prev_trial = ifelse(lag(gng_response_type == &quot;FH&quot; | gng_response_type == &quot;SH&quot;) == TRUE, &quot;correct&quot;,
+      ifelse(lag(gng_response_type == &quot;FA&quot;) == TRUE, &quot;incorrect&quot;, NA))) 
+
+
+# For each first trial in a block, accuracy_prev_trial cannot be determined -&gt; set these values to NA
+single_trial_data[single_trial_data$trial == 1 |
+                  single_trial_data$trial == 29  | single_trial_data$trial == 101|
+                  single_trial_data$trial == 173 | single_trial_data$trial == 201| 
+                  single_trial_data$trial == 273 | single_trial_data$trial == 345|
+                  single_trial_data$trial == 373 | single_trial_data$trial == 445, &quot;accuracy_prev_trial&quot;] &lt;- NA
+
+
 # For go/no-go RT analysis, exclude inhibited gng responses, missing gng responses, gng responses with wrong key, and RT outliers
 single_trial_data_gng_rt &lt;- single_trial_data %&gt;%
   dplyr::filter(
@@ -434,8 +451,9 @@ single_trial_data_gng_rt &lt;- single_trial_data %&gt;%
 
 
 # Make categorical variables factors
-single_trial_data_gng_rt$gng_response_type &lt;- factor(single_trial_data_gng_rt$gng_response_type, levels = c(&quot;SH&quot;, &quot;FH&quot;, &quot;FA&quot;))
-single_trial_data_gng_rt$participant_id    &lt;- factor(single_trial_data_gng_rt$participant_id)</code></pre>
+single_trial_data_gng_rt$gng_response_type   &lt;- factor(single_trial_data_gng_rt$gng_response_type, levels = c(&quot;SH&quot;, &quot;FH&quot;, &quot;FA&quot;))
+single_trial_data_gng_rt$participant_id      &lt;- factor(single_trial_data_gng_rt$participant_id)
+single_trial_data_gng_rt$accuracy_prev_trial &lt;- factor(single_trial_data_gng_rt$accuracy_prev_trial)</code></pre>
 <p>Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant’s median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of RT in the go/no-go task, trials with correctly inhibited responses were not considered. For details on the percentage of excluded trials, please see section “Data Cleaning” in the tab “Word Categorization Task”. <br><br><br></p>
 </div>
 <div id="descriptive-statistics" class="section level2">
@@ -443,7 +461,7 @@ single_trial_data_gng_rt$participant_id    &lt;- factor(single_trial_data_gng_rt
 <hr />
 <div id="means-and-cis" class="section level3">
 <h3>Means and CIs</h3>
-<p>This table corresponds to Table S6 in the supplemental material.</p>
+<p>This table corresponds to Table S2 in the supplemental material.</p>
 <pre class="r"><code># Calculate descriptive statistics for RT per condition
 descriptive_statistics_rt &lt;- summarySEwithinO(
   data          = single_trial_data_gng_rt,
@@ -655,7 +673,90 @@ NA
 </tr>
 </tfoot>
 </table>
-<p><br></p>
+<p><br><br></p>
+<p>This table corresponds to Table S3 in the supplemental material.</p>
+<pre class="r"><code># Calculate descriptive statistics for post-correct and post-error accuracy
+# Note: Only SH/FH/FA trials with previous trial also SH/FH/FA are included
+post_correct_post_error_accuracy &lt;- summarySEwithinO(
+  data          = single_trial_data_gng_rt[!is.na(single_trial_data_gng_rt$gng_accuracy)  &amp; 
+                                           !is.na(single_trial_data_gng_rt$accuracy_prev_trial), ],
+  measurevar    = &quot;gng_accuracy&quot;,
+  withinvars    = &quot;accuracy_prev_trial&quot;,
+  idvar         = &quot;participant_id&quot;,
+  conf.interval = .95
+) %&gt;%
+  # Multiply numeric values by 100 to obtain values in percent
+  dplyr::mutate_if(is.numeric, list(~. * 100)) %&gt;%
+  # Format confidence interval column and add column with labels
+  dplyr::mutate(
+    ci   = paste0(&quot;[&quot;, round(gng_accuracy - ci, digits = 2),
+                 &quot;, &quot;, round(gng_accuracy + ci, digits = 2), &quot;]&quot;),
+    type = c(&quot;Post-correct accuracy&quot;, &quot;Post-error accuracy&quot;)) %&gt;%  
+  # Select columns to be displayed
+  dplyr::select(c(&quot;type&quot;, &quot;gng_accuracy&quot;, &quot;ci&quot;))
+
+
+# Display descriptive statistics for post-correct and post-error accuracy 
+my_table_template(post_correct_post_error_accuracy,
+  caption = &quot;Post-Correct Accuracy and Post-Error Accuracy&quot;,
+  col_names = c(&quot;Type of accuracy&quot;, &quot;M&quot;, &quot;95% CI&quot;),
+  footnote_config = c(general = &quot;Confidence intervals are adjusted for within-participant designs as described by Morey (2008).&quot;)
+)</code></pre>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<caption style="font-size: initial !important;">
+Post-Correct Accuracy and Post-Error Accuracy
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Type of accuracy
+</th>
+<th style="text-align:right;">
+M
+</th>
+<th style="text-align:left;">
+95% CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Post-correct accuracy
+</td>
+<td style="text-align:right;">
+84.59
+</td>
+<td style="text-align:left;">
+[83.43, 85.74]
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Post-error accuracy
+</td>
+<td style="text-align:right;">
+86.94
+</td>
+<td style="text-align:left;">
+[84.29, 89.6]
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Note: </span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup> Confidence intervals are adjusted for within-participant designs as described by Morey (2008).
+</td>
+</tr>
+</tfoot>
+</table>
+<p><br><br></p>
 </div>
 <div id="number-of-false-alarms" class="section level3">
 <h3>Number of false alarms</h3>
@@ -674,15 +775,15 @@ FA_sd   &lt;- round(sd(FAs$number_FAs),   digits = 2)</code></pre>
 <p>Number of false alarms: <em>M</em> = 56.3, <em>SD</em> = 28.91 <br><br><br></p>
 </div>
 </div>
-<div id="lmm-analysis" class="section level2">
-<h2>LMM Analysis</h2>
+<div id="glmm-analyses" class="section level2">
+<h2>(G)LMM Analyses</h2>
 <hr />
 <p>To evaluate RT differences between response types in the go/no-go task, we fitted a LMM on the inverse-transformed RT with response type (slow hit, fast hit, false alarm) as fixed effect and by-participant random effects. LMM analysis was conducted on inverse-transformed RT values to meet the assumption of normally distributed residuals. For details on contrast coding and the procedure used to specify the random-effects structure, please see section “(G)LMM analyses” in the tab “Word Categorization Task”. <br><br></p>
 <div id="rt" class="section level3">
 <h3>RT</h3>
 <div id="run-first-model" class="section level4">
 <h4>Run first model</h4>
-<p>As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. <br><br> This table corresponds to the results section “Behavioral Performance in the Go/No-Go Task” in the manuscript and Table S7 in the supplemental material.</p>
+<p>As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. <br><br> This table corresponds to the results section “Behavioral Performance in the Go/No-Go Task” in the manuscript and Table S4 in the supplemental material.</p>
 <pre class="r"><code># Define contrasts (sliding difference contrasts)
 contrasts(single_trial_data_gng_rt$gng_response_type) &lt;- contr.sdif(3)
 
@@ -833,7 +934,7 @@ Observations
 </div>
 <div id="run-second-model" class="section level4">
 <h4>Run second model</h4>
-<p>This table corresponds to the results section “Behavioral Performance in the Go/No-Go Task” in the manuscript and Table S7 in the supplemental material.</p>
+<p>This table corresponds to the results section “Behavioral Performance in the Go/No-Go Task” in the manuscript and Table S4 in the supplemental material.</p>
 <pre class="r"><code># Reorder factor levels
 single_trial_data_gng_rt$gng_response_type &lt;- factor(single_trial_data_gng_rt$gng_response_type, levels = c(&quot;SH&quot;, &quot;FA&quot;, &quot;FH&quot;))
 
@@ -987,6 +1088,118 @@ Observations
 <p>RTs were longer for slow hits compared to false alarms. <br><br><br></p>
 </div>
 </div>
+<div id="accuracy" class="section level3">
+<h3>Accuracy</h3>
+<p>To examine whether there was a post-error increase in accuracy, we fitted a binomial GLMM on response accuracy (false alarm vs. hit) with accuracy in the preceding go/no-go trial as fixed effect and by-participant random effects. <br> This table corresponds to the results section “Behavioral Performance in the Go/No-Go Task” in the manuscript and Table S5 in the supplemental material.</p>
+<pre class="r"><code># Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_gng_rt$accuracy_prev_trial) &lt;- contr.sdif(2)
+
+
+# Run model with maximal random-effects structure 
+# Note: Only SH/FH/FA trials with previous trial also SH/FH/FA are included
+GLMM_gng_accuracy &lt;- glmer(gng_accuracy ~ accuracy_prev_trial +
+  (1 + accuracy_prev_trial | participant_id),
+data = single_trial_data_gng_rt,
+family = binomial,
+control = glmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+# summary(GLMM_gng_accuracy) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_gng_accuracy)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_gng_accuracy,
+  dv.labels = &quot;Accuracy in the go/no-go task&quot;, show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  pred.labels = c(&quot;(Intercept)&quot; = &quot;Intercept&quot;, &quot;accuracy_prev_trial2-1&quot; = &quot;Accuracy on trial N – 1 (false alarm – hit)&quot;),
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;z value&quot;,
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;  
+)
+
+
+# Display random effects
+print(&quot;Random effects:&quot;)
+print(VarCorr(GLMM_gng_accuracy), digits = 2, comp = &quot;Std.Dev.&quot;)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+Accuracy in the go/no-go task
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+z value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+8.56
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+6.41 – 11.44
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Accuracy on trial N – 1<br>(false alarm – hit)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.90
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.38 – 2.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+3.91
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+8421
+</td>
+</tr>
+</table>
+<pre><code>[1] &quot;Random effects:&quot;
+ Groups         Name                   Std.Dev. Corr
+ participant_id (Intercept)            0.69         
+                accuracy_prev_trial2-1 0.34     0.91</code></pre>
+<p><br><br> Results of the GLMM revealed a significant main effect of the accuracy in the preceding go/no-go trial, indicating that response accuracy was higher following false alarms than following hits, suggesting that there was a post-error increase in accuracy. <br><br><br></p>
+</div>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
@@ -999,7 +1212,7 @@ Observations
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.6.1 (2019-07-05)
 Platform: x86_64-w64-mingw32/x64 (64-bit)
-Running under: Windows 10 x64 (build 18363)
+Running under: Windows 10 x64 (build 19042)
 
 Matrix products: default
 

@@ -50,6 +50,23 @@ options(scipen = 999)
 load(file = "./data/Single_Trial_Data.rda")
 
 
+# Create variables gng_accuracy (1 for hit, 0 for FA) and accuracy_prev_trial (use unfiltered data to make sure previous trial in table = previous trial in task)
+single_trial_data <- single_trial_data %>%
+  dplyr::mutate(
+    gng_accuracy = ifelse(gng_response_type == "FH" | gng_response_type == "SH", 1,
+      ifelse(gng_response_type == "FA", 0, NA)),
+    accuracy_prev_trial = ifelse(lag(gng_response_type == "FH" | gng_response_type == "SH") == TRUE, "correct",
+      ifelse(lag(gng_response_type == "FA") == TRUE, "incorrect", NA))) 
+
+
+# For each first trial in a block, accuracy_prev_trial cannot be determined -> set these values to NA
+single_trial_data[single_trial_data$trial == 1 |
+                  single_trial_data$trial == 29  | single_trial_data$trial == 101|
+                  single_trial_data$trial == 173 | single_trial_data$trial == 201| 
+                  single_trial_data$trial == 273 | single_trial_data$trial == 345|
+                  single_trial_data$trial == 373 | single_trial_data$trial == 445, "accuracy_prev_trial"] <- NA
+
+
 # For go/no-go RT analysis, exclude inhibited gng responses, missing gng responses, gng responses with wrong key, and RT outliers
 single_trial_data_gng_rt <- single_trial_data %>%
   dplyr::filter(
@@ -62,8 +79,9 @@ single_trial_data_gng_rt <- single_trial_data %>%
 
 
 # Make categorical variables factors
-single_trial_data_gng_rt$gng_response_type <- factor(single_trial_data_gng_rt$gng_response_type, levels = c("SH", "FH", "FA"))
-single_trial_data_gng_rt$participant_id    <- factor(single_trial_data_gng_rt$participant_id)
+single_trial_data_gng_rt$gng_response_type   <- factor(single_trial_data_gng_rt$gng_response_type, levels = c("SH", "FH", "FA"))
+single_trial_data_gng_rt$participant_id      <- factor(single_trial_data_gng_rt$participant_id)
+single_trial_data_gng_rt$accuracy_prev_trial <- factor(single_trial_data_gng_rt$accuracy_prev_trial)
 ```
 
 Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant's median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of RT in the go/no-go task, trials with correctly inhibited responses were not considered. For details on the percentage of excluded trials, please see section "Data Cleaning" in the tab "Word Categorization Task".
@@ -73,7 +91,7 @@ Trials were excluded from all analyses if RT in the go/no-go task was shorter th
 ***
 ### Means and CIs
 
-This table corresponds to Table S6 in the supplemental material.  
+This table corresponds to Table S2 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -135,7 +153,41 @@ my_table_template(descriptive_statistics[c(3, 2, 1, 4, 5, 6), ],
   footnote_config = c(general = "RT confidence intervals are adjusted for within-participant designs as described by Morey (2008).")
 )
 ```
-<br>
+<br><br>
+
+This table corresponds to Table S3 in the supplemental material.  
+
+```{r post-correct-accuracy-post-error-accuracy-table}
+
+# Calculate descriptive statistics for post-correct and post-error accuracy
+# Note: Only SH/FH/FA trials with previous trial also SH/FH/FA are included
+post_correct_post_error_accuracy <- summarySEwithinO(
+  data          = single_trial_data_gng_rt[!is.na(single_trial_data_gng_rt$gng_accuracy)  & 
+                                           !is.na(single_trial_data_gng_rt$accuracy_prev_trial), ],
+  measurevar    = "gng_accuracy",
+  withinvars    = "accuracy_prev_trial",
+  idvar         = "participant_id",
+  conf.interval = .95
+) %>%
+  # Multiply numeric values by 100 to obtain values in percent
+  dplyr::mutate_if(is.numeric, list(~. * 100)) %>%
+  # Format confidence interval column and add column with labels
+  dplyr::mutate(
+    ci   = paste0("[", round(gng_accuracy - ci, digits = 2),
+                 ", ", round(gng_accuracy + ci, digits = 2), "]"),
+    type = c("Post-correct accuracy", "Post-error accuracy")) %>%  
+  # Select columns to be displayed
+  dplyr::select(c("type", "gng_accuracy", "ci"))
+
+
+# Display descriptive statistics for post-correct and post-error accuracy 
+my_table_template(post_correct_post_error_accuracy,
+  caption = "Post-Correct Accuracy and Post-Error Accuracy",
+  col_names = c("Type of accuracy", "M", "95% CI"),
+  footnote_config = c(general = "Confidence intervals are adjusted for within-participant designs as described by Morey (2008).")
+)
+```
+<br><br>
 
 ### Number of false alarms
 
@@ -159,7 +211,7 @@ FA_sd   <- round(sd(FAs$number_FAs),   digits = 2)
 Number of false alarms: *M* = `r FA_mean`, *SD* = `r FA_sd`
 <br><br><br>
 
-## LMM Analysis
+## (G)LMM Analyses
 ***
 To evaluate RT differences between response types in the go/no-go task, we fitted a LMM on the inverse-transformed RT with response type (slow hit, fast hit, false alarm) as fixed effect and by-participant random effects. LMM analysis was conducted on inverse-transformed RT values to meet the assumption of normally distributed residuals. 
 For details on contrast coding and the procedure used to specify the random-effects structure, please see section "(G)LMM analyses" in the tab "Word Categorization Task".
@@ -171,7 +223,7 @@ For details on contrast coding and the procedure used to specify the random-effe
 
 As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
 <br><br>
-This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S7 in the supplemental material.  
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S4 in the supplemental material.  
 
 ```{r RT-LMM-final-model-1}
 
@@ -235,7 +287,7 @@ RTs were longer for slow hits compared to fast hits. RTs for fast hits and false
 
 #### Run second model 
 
-This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S7 in the supplemental material. 
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S4 in the supplemental material. 
 
 ```{r RT-LMM-final-model-2}
 
@@ -299,6 +351,53 @@ print("Random effects:")
 print(VarCorr(LMM_gng_rt_2), digits = 2, comp = "Std.Dev.")
 ```
 RTs were longer for slow hits compared to false alarms. 
+<br><br><br>
+
+### Accuracy
+
+To examine whether there was a post-error increase in accuracy, we fitted a binomial GLMM on response accuracy (false alarm vs. hit) with accuracy in the preceding go/no-go trial as fixed effect and by-participant random effects.
+<br>
+This table corresponds to the results section "Behavioral Performance in the Go/No-Go Task" in the manuscript and Table S5 in the supplemental material.
+
+```{r post-error-increase-of-accuracy-GLMM}
+
+# Define contrasts (sliding difference contrasts)
+contrasts(single_trial_data_gng_rt$accuracy_prev_trial) <- contr.sdif(2)
+
+
+# Run model with maximal random-effects structure 
+# Note: Only SH/FH/FA trials with previous trial also SH/FH/FA are included
+GLMM_gng_accuracy <- glmer(gng_accuracy ~ accuracy_prev_trial +
+  (1 + accuracy_prev_trial | participant_id),
+data = single_trial_data_gng_rt,
+family = binomial,
+control = glmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(GLMM_gng_accuracy) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(GLMM_gng_accuracy)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(GLMM_gng_accuracy,
+  dv.labels = "Accuracy in the go/no-go task", show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  pred.labels = c("(Intercept)" = "Intercept", "accuracy_prev_trial2-1" = "Accuracy on trial N – 1 (false alarm – hit)"),
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "z value",
+  string.ci = "95 % CI", string.p = "p value"  
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(GLMM_gng_accuracy), digits = 2, comp = "Std.Dev.")
+```
+<br><br>
+Results of the GLMM revealed a significant main effect of the accuracy in the preceding go/no-go trial, indicating that response accuracy was higher following false alarms than following hits, suggesting that there was a post-error increase in accuracy.
 <br><br><br>
 
 ## References
