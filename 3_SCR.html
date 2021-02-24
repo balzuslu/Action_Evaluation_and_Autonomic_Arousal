@@ -457,12 +457,13 @@ single_trial_data_scr &lt;- single_trial_data %&gt;%
 
 # Calculate standardized SCR and standardized square root transformed SCR
 single_trial_data_scr &lt;- single_trial_data_scr %&gt;%
-  group_by(participant_id) %&gt;%
-    dplyr::mutate(
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::mutate(
       iscr_gng_resp_sqrt   = sqrt(iscr_gng_resp),
       iscr_gng_resp_z      = scale(iscr_gng_resp, center = TRUE, scale = TRUE),
       iscr_gng_resp_sqrt_z = scale(sqrt(iscr_gng_resp), center = TRUE, scale = TRUE)
-    )
+    ) %&gt;%
+  dplyr::ungroup()
 
 
 # Make categorical variables factors
@@ -478,7 +479,7 @@ single_trial_data_scr$fixation_cross_white  &lt;- factor(single_trial_data_scr$f
 <hr />
 <div id="means-and-cis" class="section level3">
 <h3>Means and CIs</h3>
-<p>This table corresponds to Table S4 in the supplemental material.</p>
+<p>This table corresponds to Table S9 in the supplemental material.</p>
 <pre class="r"><code># Calculate descriptive statistics for standardized SCR per condition
 descriptive_statistics_scr_z &lt;- summarySEwithinO(
   data          = single_trial_data_scr,
@@ -609,10 +610,11 @@ Note. Standardized SCR is shown as a function of response type in the go/no-go t
 <p>Participants exhibiting no measurable SCR (i.e., ISCR scores of zero) in more than 75% of all trials were classified as physiological nonresponders. All participants were below this threshold, so no participants were excluded from SCR analyses.</p>
 <pre class="r"><code># Calculate percentage of zero responses (based on all trials)
 zero_responses &lt;- single_trial_data[!is.na(single_trial_data$iscr_gng_resp), ] %&gt;%
-  group_by(participant_id) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
   dplyr::summarize(
     percentage_zero_responses = length(participant_id[iscr_gng_resp == 0]) / length(participant_id) * 100
-  )
+  ) %&gt;%
+  dplyr::ungroup()
 
 
 percentage_zero_responses_mean &lt;- round(mean(zero_responses$percentage_zero_responses), digits = 2)
@@ -630,7 +632,7 @@ percentage_zero_responses_max  &lt;- round(max(zero_responses$percentage_zero_re
 <h3>SCR</h3>
 <div id="run-first-model" class="section level4">
 <h4>Run first model</h4>
-<p>As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. <br><br> This table corresponds to the results section “Skin Conductance Response” in the manuscript and Table S5 in the supplemental material.</p>
+<p>As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. <br><br> This table corresponds to the results section “Skin Conductance Response” in the manuscript and Table S10 in the supplemental material.</p>
 <pre class="r"><code># Define contrasts (sliding difference contrasts)
 contrasts(single_trial_data_scr$gng_response_type) &lt;- contr.sdif(3)
 
@@ -773,7 +775,7 @@ Observations
 </div>
 <div id="run-second-model" class="section level4">
 <h4>Run second model</h4>
-<p>This table corresponds to the results section “Skin Conductance Response” in the manuscript and Table S5 in the supplemental material.</p>
+<p>This table corresponds to the results section “Skin Conductance Response” in the manuscript and Table S10 in the supplemental material.</p>
 <pre class="r"><code># Reorder factor levels
 single_trial_data_scr$gng_response_type &lt;- factor(single_trial_data_scr$gng_response_type, levels=c(&quot;SH&quot;,&quot;FA&quot;,&quot;FH&quot;)) 
 
@@ -927,9 +929,9 @@ Observations
 <p>Participants exhibited a higher SCR following false alarms than following slow hits. <br><br><br></p>
 </div>
 </div>
-<div id="scr---affective-priming" class="section level3">
-<h3>SCR - affective priming</h3>
-<p>To test the association between autonomic arousal and affective priming effect, we included the square root-transformed and z-standardized SCR as continuous predictor in the LMM used to analyze word categorization RT. The analysis was comparable to the LMM on word categorization RT, except for the specified levels of the fixed factor response type (slow hit, fast hit, false alarm, but not inhibited response) and the reduced number of observations entering the analysis due to the trial selection criteria for SCR analyses.</p>
+<div id="scr---affective-primingpes" class="section level3">
+<h3>SCR - affective priming/PES</h3>
+<p>To test the association between autonomic arousal and affective priming effect and between autonomic arousal and PES, we included the square root-transformed and <em>z</em>-standardized SCR as continuous predictor in the LMM used to analyze word categorization RT. The analysis was comparable to the LMM on word categorization RT, except for the specified levels of the fixed factor response type (slow hit, fast hit, false alarm, but not inhibited response) and the reduced number of observations entering the analysis due to the trial selection criteria for SCR analyses.</p>
 <pre class="r"><code># Reorder factor levels again
 single_trial_data_scr$gng_response_type &lt;- factor(single_trial_data_scr$gng_response_type, levels=c(&quot;SH&quot;,&quot;FH&quot;,&quot;FA&quot;)) 
 
@@ -1543,10 +1545,178 @@ Observations
 </table>
 <p><br> Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. <br><br><br></p>
 </div>
-<div id="plot-pes---scr-effect" class="section level4">
-<h4>Plot PES - SCR effect</h4>
-<p>This figure corresponds to Figure 4 in the manuscript. The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM.</p>
-<pre class="r"><code># Respecify LMM without interactions stated with &quot;:&quot; in random structure (because plot_model does not like that) 
+<div id="scr---pes-gono-go-task" class="section level4">
+<h4>SCR - PES (go/no-go task)</h4>
+<p>To test whether there was PES also in the subsequent go/no-go trial and whether its magnitude was predicted by SCR, we additionally fitted a LMM on PES with the <em>z</em>-standardized SCR as predictor and by-participant random effects. We calculated single-trial values of PES by quantifying the RT difference between correct trials preceding and following an error (Dutilh et al., 2012). Errors were included in this analysis only if they were preceded by at least two correct responses and followed by at least one correct response. <br> This table corresponds to the results section “Relation Between Post-Error Slowing and Skin Conductance Response” in the manuscript and Table S11 in the supplemental material.</p>
+<pre class="r"><code># Create column with single-trial PES (RT post-error − RT pre-error for all CCEC sequences) 
+single_trial_data$pes &lt;- NA
+for (i in 3:(nrow(single_trial_data) - 1)) {
+  if (
+      # Trial N must be FA
+      single_trial_data[i, ]$gng_response_type == &quot;FA&quot; &amp;
+      # Trial N-1 and N+1 must be SH or FH (IR not included here as RT value is required for PES calculation and IR has no such)
+      (single_trial_data[(i + 1), ]$gng_response_type == &quot;SH&quot; | single_trial_data[(i + 1), ]$gng_response_type == &quot;FH&quot;) &amp;
+      (single_trial_data[(i - 1), ]$gng_response_type == &quot;SH&quot; | single_trial_data[(i - 1), ]$gng_response_type == &quot;FH&quot;) &amp;
+      # Trial N-2 must be correct (i.e., SH, FH, or IR)
+      single_trial_data[(i - 2), ]$gng_response_type != &quot;FA&quot; &amp;
+      single_trial_data[(i - 2), ]$gng_response_type != &quot;wrong_key&quot; &amp;
+      single_trial_data[(i - 2), ]$gng_response_type != &quot;miss&quot; &amp;
+      # Trial N, N+1, and N-1 must have valid gng rt (to have valid FA and valid RTs for PES calculation)
+      single_trial_data[(i + 1), ]$gng_rt_invalid  == FALSE &amp;
+      single_trial_data[(i - 1), ]$gng_rt_invalid  == FALSE &amp;
+      single_trial_data[(i    ), ]$gng_rt_invalid  == FALSE &amp;
+      # Trial N-2 must have correct word response to avoid PES effect on gng RT in trial N-1
+      single_trial_data[(i - 2), ]$word_accuracy == &quot;correct&quot; &amp;
+      # Trial N-1 and N+1 must be directly preceding / following the error (just to make sure; should be the case,
+      # as full/unfiltered data set is used here and errors in first/last trial of each participant are excluded below)
+      single_trial_data[(i + 1), ]$trial - single_trial_data[(i - 1), ]$trial == 2
+  ) {
+    # Calculate RT post-error minus RT pre-error
+    single_trial_data[i, ]$pes &lt;- (single_trial_data[(i + 1), ]$gng_rt) - (single_trial_data[(i - 1), ]$gng_rt)
+  }
+}
+
+
+# For each last and first and trial in a block, PES cannot be determined -&gt; set these values to NA
+single_trial_data[single_trial_data$trial == 1  | single_trial_data$trial == 28  | 
+                  single_trial_data$trial == 29 | single_trial_data$trial == 100 | 
+                  single_trial_data$trial == 101| single_trial_data$trial == 172 | 
+                  single_trial_data$trial == 173| single_trial_data$trial == 200 | 
+                  single_trial_data$trial == 201| single_trial_data$trial == 272 | 
+                  single_trial_data$trial == 273| single_trial_data$trial == 344 | 
+                  single_trial_data$trial == 345| single_trial_data$trial == 372 | 
+                  single_trial_data$trial == 373| single_trial_data$trial == 444 | 
+                  single_trial_data$trial == 445| single_trial_data$trial == 516, &quot;pes&quot;] &lt;- NA
+
+
+# Density plot and q-q plot for PES values -&gt; PES normally distributed, no transformation necessary
+# par(mfrow = c(2, 2)) # arrange plots
+# plot(density(single_trial_data[!is.na(single_trial_data$pes), ]$pes), main = &quot;PES: Density  Plot&quot;)
+# qqnorm(single_trial_data[!is.na(single_trial_data$pes), ]$pes, main = &quot;PES: Q-Q Plot&quot;, pch = 1, frame = FALSE)
+# par(mfrow = c(1, 1)) # reset layout
+
+
+# Box–Cox procedure: lambda = 0.87, suggesting that no transformation is necessary (for lambda around 1)
+# bc_pes &lt;- boxcox(pes + 400 ~ 1, data = single_trial_data[!is.na(single_trial_data$pes), ])
+# optlambda_pes &lt;- bc_pes$x[which.max(bc_pes$y)]
+
+
+# Calculate standardized square root transformed SCR for trials entering PES LMM (predictor must be standardized)
+single_trial_data$iscr_gng_resp_sqrt_z_pes &lt;- NA
+single_trial_data[!is.na(single_trial_data$pes), ] &lt;- single_trial_data[!is.na(single_trial_data$pes), ] %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::mutate(iscr_gng_resp_sqrt_z_pes = scale(sqrt(iscr_gng_resp), center = TRUE, scale = TRUE)) %&gt;%
+  dplyr::ungroup()
+
+
+# Run model
+LMM_scr_pes &lt;- lmer(pes ~ iscr_gng_resp_sqrt_z_pes +
+  (1 | participant_id),
+data = single_trial_data,
+REML = TRUE,
+control = lmerControl(optimizer = &quot;bobyqa&quot;)
+)
+
+
+# Check model output
+# summary(LMM_scr_pes) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_pes)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_pes,
+  dv.labels = &quot;PES (robust) in the go/no-go task&quot;, pred.labels = c(&quot;(Intercept)&quot; = &quot;Intercept&quot;, &quot;iscr_gng_resp_sqrt_z_pes&quot; = &quot;SCR&quot;),
+  show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = &quot;b&quot;, string.stat = &quot;t value&quot;,
+  string.ci = &quot;95 % CI&quot;, string.p = &quot;p value&quot;,  p.val = &quot;satterthwaite&quot;
+)
+
+
+# Display random effects
+print(&quot;Random effects:&quot;)
+print(VarCorr(LMM_scr_pes), digits = 4, comp = &quot;Std.Dev.&quot;)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+PES (robust) in the go/no-go task
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+b
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+95 % CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+t value
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p value
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+Intercept
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+23.24
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+14.60 – 31.87
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+5.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+SCR
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+8.88
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.27 – 15.48
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.009</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+638
+</td>
+</tr>
+</table>
+<pre><code>[1] &quot;Random effects:&quot;
+ Groups         Name        Std.Dev.
+ participant_id (Intercept) 15.28   
+ Residual                   83.11   </code></pre>
+<p>The analysis yielded a significant intercept, indicating that following false alarms, there was PES also in the subsequent go/no-go trial. Additionally, there was a significant main effect of SCR, indicating that SCR predicted this slowing on a trial-by-trial level. <br><br><br></p>
+</div>
+<div id="plot-relation-pes---scr" class="section level4">
+<h4>Plot relation PES - SCR</h4>
+<p>This figure corresponds to Figure 4 in the manuscript. The plot shows the predicted values (marginal effects) for the relation between skin conductance response (SCR) and post-error slowing (PES).</p>
+<pre class="r"><code># Respecify priming LMM without interactions stated with &quot;:&quot; in random structure (because plot_model does not like that) 
 # Also enter fixed effects as factors, not contrasts (to have all factor levels in the plot)
 # Double bar syntax for zero-correlation parameter model won&#39;t work anymore (full model still converges, no singular fit)
 LMM_scr_priming_plot &lt;- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
@@ -1558,13 +1728,13 @@ control = lmerControl(optimizer = &quot;bobyqa&quot;)
 )
 
 
-# Plot marginal effects
-plot_model(LMM_scr_priming_plot, 
-           type   = &quot;pred&quot;, 
-           terms  = c(&quot;iscr_gng_resp_sqrt_z&quot;, &quot;gng_response_type&quot;), 
-           ci.lvl = .95) +
+# Create plot marginal effects PES (word categorization) - SCR
+plot_scr_pes_word &lt;- plot_model(LMM_scr_priming_plot,
+                                type   = &quot;pred&quot;,
+                                terms  = c(&quot;iscr_gng_resp_sqrt_z&quot;, &quot;gng_response_type&quot;),
+                                ci.lvl = .95) +
   labs(title = NULL, 
-       x     = &quot;Standardized Square Root-Transformed SCR (µS)&quot;, 
+       x     = &quot;SCR (Standardized SQRT-Transformed [µS])&quot;, 
        y     = &quot;Word Categorization RT (−1000/RT[ms])&quot;) +
   my_figure_theme +
   aes(linetype = group, color = group) + 
@@ -1572,17 +1742,193 @@ plot_model(LMM_scr_priming_plot,
   scale_color_manual(name =    &quot;Response Type&quot;, values = c(&quot;#ffad48&quot;, &quot;#43b7c2&quot;, &quot;#024b79&quot;)) +
   theme(axis.ticks.x = NULL) + 
   scale_y_continuous(breaks=seq(-2, -1.3, 0.1), limits = c(-2, -1.3), expand = c(0,0)) +
-  scale_x_continuous(breaks=seq(-4, 6, 2),      limits = c(-4, 6),    expand = c(0,0))</code></pre>
+  scale_x_continuous(breaks=seq(-4, 6, 2),      limits = c(-4, 6),    expand = c(0,0))
+
+
+# Create plot marginal effects PES (go/no-go) - SCR
+plot_scr_pes_gng &lt;- plot_model(LMM_scr_pes, 
+                               type   = &quot;pred&quot;,
+                               terms  = c(&quot;iscr_gng_resp_sqrt_z_pes&quot;),
+                               ci.lvl = .95) +
+  labs(title = NULL, 
+       x     = &quot;SCR (Standardized SQRT-Transformed [µS])&quot;, 
+       y     = &quot;PES in the Go/No-Go Task (ms)&quot;) +
+  my_figure_theme +
+  aes(color = group, fill = group) + 
+  scale_color_manual(values = &quot;#024b79&quot;) +
+  scale_fill_manual(values  = &quot;#024b79&quot;) +
+  theme(axis.ticks.x = NULL) + 
+  scale_y_continuous(breaks=seq(-40, 100, 20), limits = c(-40, 100), expand = c(0,0)) +
+  scale_x_continuous(breaks=seq(-3, 4, 1),     limits = c(-3, 4),    expand = c(0,0)) + 
+  theme(legend.position = &quot;none&quot;) 
+
+
+# Arrange plots
+figure_scr_pes &lt;- ggdraw() +
+  draw_plot(plot_scr_pes_word, x =  0,   y = 0,    width = .5, height = 0.9)   +
+  draw_plot(plot_scr_pes_gng,  x = .5,   y = .184, width = .5, height = 0.718) +
+  draw_plot_label(c(&quot;A&quot;, &quot;B&quot;), c(0, 0.5), c(1, 1), size = 15)
+
+
+# Save plot
+# ggsave(&quot;figure_scr_pes.tiff&quot;, width = 20, height = 12 , units = &quot;cm&quot;, dpi=600, compression = &quot;lzw&quot;)
+
+
+# Display plot
+figure_scr_pes</code></pre>
 <div class="figure">
-<img src="3_SCR_files/figure-html/plot-pes-scr-original-1.png" alt="Note. Estimated interaction effects of SCR and response type in the go/no-go task on word categorization RT. RT values are displayed on an inverse scale, standardized SCR values on a square root scale. The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. Shaded areas represent 95% confidence intervals." width="672" />
+<img src="3_SCR_files/figure-html/plot-pes-scr-1.png" alt="Note. (A) Estimated interaction effects of SCR and response type in the go/no-go task (SH = slow hit; FH = fast hit; FA = false alarm) on word categorization response time (RT). The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. (B) Estimated effect of SCR on PES in the go/no-go task. PES was quantified using the method proposed by Dutilh et al. (2012). Shaded areas represent 95% confidence intervals. SQRT = square root." width="768" />
 <p class="caption">
-Note. Estimated interaction effects of SCR and response type in the go/no-go task on word categorization RT. RT values are displayed on an inverse scale, standardized SCR values on a square root scale. The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. Shaded areas represent 95% confidence intervals.
+Note. (A) Estimated interaction effects of SCR and response type in the go/no-go task (SH = slow hit; FH = fast hit; FA = false alarm) on word categorization response time (RT). The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. (B) Estimated effect of SCR on PES in the go/no-go task. PES was quantified using the method proposed by Dutilh et al. (2012). Shaded areas represent 95% confidence intervals. SQRT = square root.
 </p>
 </div>
-<pre class="r"><code># ggsave(&quot;figure_scr_pes.tiff&quot;,width = 11, height = 13 , units = &quot;cm&quot;, dpi = 600, compression = &quot;lzw&quot;)</code></pre>
-<p><br><br><br></p>
+<p><br></p>
 </div>
 </div>
+</div>
+<div id="correlations" class="section level2">
+<h2>Correlations</h2>
+<hr />
+<p>We calculated correlations between priming effect and SCR (for FA and FH) and between SCR and PES. PES was quantified as the error-related slowing in the subsequent go/no-go trial using the method proposed by Dutilh et al. (2012).</p>
+<pre class="r"><code># Calculate individual score for priming (after FA and FH)
+priming &lt;- single_trial_data %&gt;%
+  # Apply trial exclusion criteria for priming effect
+  dplyr::filter(
+    word_accuracy == &quot;correct&quot; &amp;
+    (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &amp;
+    (is.na(word_rt_outlier) | word_rt_outlier == FALSE)) %&gt;%
+  # Calculate mean per participant
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::summarize(
+    pos_after_FA     = mean(word_rt[gng_response_type == &quot;FA&quot; &amp; word_valence == &quot;pos&quot;], na.rm = TRUE),
+    neg_after_FA     = mean(word_rt[gng_response_type == &quot;FA&quot; &amp; word_valence == &quot;neg&quot;], na.rm = TRUE),
+    priming_after_FA = pos_after_FA - neg_after_FA,
+    pos_after_FH     = mean(word_rt[gng_response_type == &quot;FH&quot; &amp; word_valence == &quot;pos&quot;], na.rm = TRUE),
+    neg_after_FH     = mean(word_rt[gng_response_type == &quot;FH&quot; &amp; word_valence == &quot;neg&quot;], na.rm = TRUE),
+    priming_after_FH = neg_after_FH - pos_after_FH) %&gt;%
+  dplyr::mutate(participant_id = factor(participant_id)) %&gt;%
+  dplyr::ungroup()
+
+
+# Calculate individual score for SCR (after FA)
+SCR_z_FA &lt;- single_trial_data_scr %&gt;%
+  # Necessary to make contrast columns having same name unique 
+  setNames(make.unique(names(.))) %&gt;%
+  # Select only FA trials
+  dplyr::filter(gng_response_type == &quot;FA&quot;) %&gt;%
+  # Scale SCR for this data subset
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::mutate(iscr_gng_resp_z_FA = scale(iscr_gng_resp, center = TRUE, scale = TRUE)) %&gt;%
+  # Calculate mean per participant
+  dplyr::summarize(SCR_z_FA = mean(iscr_gng_resp_z_FA, na.rm = TRUE)) %&gt;%
+  dplyr::ungroup()
+
+
+# Calculate individual score for SCR (after FH)
+SCR_z_FH &lt;- single_trial_data_scr %&gt;%
+  # Necessary to make contrast columns having same name unique 
+  setNames(make.unique(names(.))) %&gt;%
+  # Select only FH trials
+  dplyr::filter(gng_response_type == &quot;FH&quot;) %&gt;%
+  # Scale SCR for this data subset
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::mutate(iscr_gng_resp_z_FH = scale(iscr_gng_resp, center = TRUE, scale = TRUE)) %&gt;%
+  # Calculate mean per participant 
+  dplyr::summarize(SCR_z_FH = mean(iscr_gng_resp_z_FH, na.rm = TRUE)) %&gt;%
+  dplyr::ungroup()
+
+
+# Calculate individual score for robust PES 
+PES_gng &lt;- single_trial_data %&gt;%
+  dplyr::filter(!is.na(pes)) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
+  dplyr::summarize(PES_gng = mean(pes, na.rm = TRUE)) %&gt;%
+  dplyr::mutate(participant_id = factor(participant_id)) %&gt;%
+  dplyr::ungroup()
+
+
+# Create dataframe for correlations
+df_correlations &lt;- left_join(priming, SCR_z_FA,         by = &quot;participant_id&quot;)
+df_correlations &lt;- left_join(df_correlations, SCR_z_FH, by = &quot;participant_id&quot;)
+df_correlations &lt;- left_join(df_correlations, PES_gng,  by = &quot;participant_id&quot;)
+
+
+# Calculate correlations
+corr_priming_FA_scr &lt;- cor.test(df_correlations$priming_after_FA, df_correlations$SCR_z_FA)
+corr_priming_FH_scr &lt;- cor.test(df_correlations$priming_after_FH, df_correlations$SCR_z_FH)
+corr_pes_scr        &lt;- cor.test(df_correlations$PES_gng,          df_correlations$SCR_z_FA)
+
+
+# Dispay correlations
+my_table_template(rbind(cbind(&quot;Priming - SCR for FA&quot;, round(corr_priming_FA_scr$estimate, digits = 2),
+                              corr_priming_FA_scr$parameter, round(corr_priming_FA_scr$p.value, digits = 3)),
+                        cbind(&quot;Priming - SCR for FH&quot;, round(corr_priming_FH_scr$estimate, digits = 2),
+                              corr_priming_FH_scr$parameter, round(corr_priming_FH_scr$p.value, digits = 3)),
+                        cbind(&quot;PES and error-related SCR&quot;, round(corr_pes_scr$estimate, digits = 2),
+                              corr_pes_scr$parameter, round(corr_pes_scr$p.value, digits = 3))),
+                  col_names = c(&quot;&quot;, &quot;r&quot;, &quot;df&quot;, &quot;p value&quot;))</code></pre>
+<table class="table table-striped table-condensed" style="font-size: 12px; width: auto !important; ">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+r
+</th>
+<th style="text-align:left;">
+df
+</th>
+<th style="text-align:left;">
+p value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Priming - SCR for FA
+</td>
+<td style="text-align:left;">
+-0.08
+</td>
+<td style="text-align:left;">
+28
+</td>
+<td style="text-align:left;">
+0.681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Priming - SCR for FH
+</td>
+<td style="text-align:left;">
+-0.28
+</td>
+<td style="text-align:left;">
+28
+</td>
+<td style="text-align:left;">
+0.132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PES and error-related SCR
+</td>
+<td style="text-align:left;">
+-0.05
+</td>
+<td style="text-align:left;">
+28
+</td>
+<td style="text-align:left;">
+0.795
+</td>
+</tr>
+</tbody>
+</table>
+<p>There was no significant correlation between priming effect and SCR or between error-related SCR and PES at the between-participant level. <br><br><br></p>
 </div>
 <div id="control-analyses" class="section level2">
 <h2>Control Analyses</h2>
@@ -2035,7 +2381,7 @@ Observations
 <div id="references" class="section level2">
 <h2>References</h2>
 <hr />
-<p>Leys, C., Ley, C., Klein, O., Bernard, P., &amp; Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. <em>Journal of Experimental Social Psychology, 49</em>(4), 764-766. <a href="https://doi.org/10.1016/j.jesp.2013.03.013" class="uri">https://doi.org/10.1016/j.jesp.2013.03.013</a> <br><br> Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). <em>Tutorials in Quantitative Methods for Psychology, 4</em>(2), 61-64. <a href="https://doi.org/10.20982/tqmp.04.2.p061" class="uri">https://doi.org/10.20982/tqmp.04.2.p061</a> <br><br> <br></p>
+<p>Dutilh, G., van Ravenzwaaij, D., Nieuwenhuis, S., van der Maas, H. L., Forstmann, B. U., &amp; Wagenmakers, E. J. (2012). How to measure post-error slowing: A confound and a simple solution. <em>Journal of Mathematical Psychology, 56</em>(3), 208-216. <a href="doi:10.1016/j.jmp.2012.04.001" class="uri">doi:10.1016/j.jmp.2012.04.001</a> <br><br> Leys, C., Ley, C., Klein, O., Bernard, P., &amp; Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. <em>Journal of Experimental Social Psychology, 49</em>(4), 764-766. <a href="https://doi.org/10.1016/j.jesp.2013.03.013" class="uri">https://doi.org/10.1016/j.jesp.2013.03.013</a> <br><br> Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). <em>Tutorials in Quantitative Methods for Psychology, 4</em>(2), 61-64. <a href="https://doi.org/10.20982/tqmp.04.2.p061" class="uri">https://doi.org/10.20982/tqmp.04.2.p061</a> <br><br> <br></p>
 </div>
 <div id="session-info" class="section level2">
 <h2>Session Info</h2>
@@ -2043,7 +2389,7 @@ Observations
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.6.1 (2019-07-05)
 Platform: x86_64-w64-mingw32/x64 (64-bit)
-Running under: Windows 10 x64 (build 18363)
+Running under: Windows 10 x64 (build 19042)
 
 Matrix products: default
 
@@ -2056,35 +2402,36 @@ attached base packages:
 [1] stats     graphics  grDevices datasets  utils     methods   base     
 
 other attached packages:
- [1] plyr_1.8.6        kableExtra_1.1.0  sjPlot_2.8.4      MASS_7.3-51.4    
- [5] lmerTest_3.1-0    lme4_1.1-21       Matrix_1.2-17     ggsignif_0.6.0   
- [9] papaja_0.1.0.9842 ggplot2_3.3.2     knitr_1.29        dplyr_0.8.3      
+ [1] plyr_1.8.6        kableExtra_1.1.0  cowplot_1.0.0     sjPlot_2.8.4     
+ [5] MASS_7.3-51.4     lmerTest_3.1-0    lme4_1.1-21       Matrix_1.2-17    
+ [9] ggsignif_0.6.0    papaja_0.1.0.9842 ggplot2_3.3.2     knitr_1.29       
+[13] dplyr_0.8.3      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.5          mvtnorm_1.0-11      lattice_0.20-38    
- [4] tidyr_1.0.0         assertthat_0.2.1    digest_0.6.22      
- [7] R6_2.4.1            backports_1.1.5     evaluate_0.14      
-[10] highr_0.8           httr_1.4.1          pillar_1.4.6       
-[13] rlang_0.4.8         minqa_1.2.4         rstudioapi_0.10    
-[16] performance_0.4.3   nloptr_1.2.1        effectsize_0.3.2   
-[19] rmarkdown_1.16      ggeffects_0.15.1    splines_3.6.1      
-[22] webshot_0.5.1       readr_1.3.1         stringr_1.4.0      
-[25] munsell_0.5.0       broom_0.5.2         compiler_3.6.1     
-[28] numDeriv_2016.8-1.1 modelr_0.1.5        xfun_0.16          
-[31] pkgconfig_2.0.3     parameters_0.8.2    htmltools_0.4.0    
-[34] insight_0.9.0       tidyselect_0.2.5    tibble_3.0.4       
-[37] codetools_0.2-16    viridisLite_0.3.0   crayon_1.3.4       
-[40] withr_2.1.2         sjmisc_2.8.2        grid_3.6.1         
-[43] nlme_3.1-140        xtable_1.8-4        gtable_0.3.0       
-[46] lifecycle_0.2.0     magrittr_1.5        bayestestR_0.7.2   
-[49] scales_1.1.0        estimability_1.3    stringi_1.4.3      
-[52] farver_2.0.1        renv_0.12.0         xml2_1.2.2         
-[55] ellipsis_0.3.0      vctrs_0.3.4         generics_0.0.2     
-[58] boot_1.3-22         sjlabelled_1.1.3    RColorBrewer_1.1-2 
-[61] tools_3.6.1         forcats_0.4.0       glue_1.3.1         
-[64] purrr_0.3.3         sjstats_0.17.8      hms_0.5.2          
-[67] emmeans_1.4.2       yaml_2.2.0          colorspace_1.4-1   
-[70] rvest_0.3.6         haven_2.2.0        </code></pre>
+ [1] httr_1.4.1          tidyr_1.0.0         viridisLite_0.3.0  
+ [4] splines_3.6.1       modelr_0.1.5        assertthat_0.2.1   
+ [7] highr_0.8           renv_0.12.0         yaml_2.2.0         
+[10] bayestestR_0.7.2    numDeriv_2016.8-1.1 pillar_1.4.6       
+[13] backports_1.1.5     lattice_0.20-38     glue_1.3.1         
+[16] digest_0.6.22       RColorBrewer_1.1-2  rvest_0.3.6        
+[19] minqa_1.2.4         colorspace_1.4-1    htmltools_0.4.0    
+[22] pkgconfig_2.0.3     broom_0.5.2         haven_2.2.0        
+[25] purrr_0.3.3         xtable_1.8-4        mvtnorm_1.0-11     
+[28] scales_1.1.0        webshot_0.5.1       emmeans_1.4.2      
+[31] tibble_3.0.4        generics_0.0.2      farver_2.0.1       
+[34] sjlabelled_1.1.3    ellipsis_0.3.0      withr_2.1.2        
+[37] magrittr_1.5        crayon_1.3.4        effectsize_0.3.2   
+[40] estimability_1.3    evaluate_0.14       nlme_3.1-140       
+[43] forcats_0.4.0       xml2_1.2.2          tools_3.6.1        
+[46] hms_0.5.2           lifecycle_0.2.0     stringr_1.4.0      
+[49] munsell_0.5.0       ggeffects_0.15.1    compiler_3.6.1     
+[52] rlang_0.4.8         grid_3.6.1          nloptr_1.2.1       
+[55] parameters_0.8.2    rstudioapi_0.10     labeling_0.3       
+[58] rmarkdown_1.16      boot_1.3-22         gtable_0.3.0       
+[61] codetools_0.2-16    sjstats_0.17.8      sjmisc_2.8.2       
+[64] R6_2.4.1            performance_0.4.3   insight_0.9.0      
+[67] readr_1.3.1         stringi_1.4.3       Rcpp_1.0.5         
+[70] vctrs_0.3.4         tidyselect_0.2.5    xfun_0.16          </code></pre>
 </div>
 
 

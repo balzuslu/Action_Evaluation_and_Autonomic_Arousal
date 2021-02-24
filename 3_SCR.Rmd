@@ -36,6 +36,7 @@ library(lme4)       # for (G)LMMs
 library(lmerTest)   # for LMM p values (Satterthwaite's method for approximating dfs for the t and F tests)
 library(MASS)       # for contrast definition
 library(sjPlot)     # for tab_model function to display (G)LMM results
+library(cowplot)    # for arranging plots
 
 
 # Load functions
@@ -122,12 +123,13 @@ single_trial_data_scr <- single_trial_data %>%
 
 # Calculate standardized SCR and standardized square root transformed SCR
 single_trial_data_scr <- single_trial_data_scr %>%
-  group_by(participant_id) %>%
-    dplyr::mutate(
+  dplyr::group_by(participant_id) %>%
+  dplyr::mutate(
       iscr_gng_resp_sqrt   = sqrt(iscr_gng_resp),
       iscr_gng_resp_z      = scale(iscr_gng_resp, center = TRUE, scale = TRUE),
       iscr_gng_resp_sqrt_z = scale(sqrt(iscr_gng_resp), center = TRUE, scale = TRUE)
-    )
+    ) %>%
+  dplyr::ungroup()
 
 
 # Make categorical variables factors
@@ -145,7 +147,7 @@ Trials were excluded from all analyses if RT in the go/no-go task was shorter th
 ***
 ### Means and CIs
 
-This table corresponds to Table S4 in the supplemental material.  
+This table corresponds to Table S9 in the supplemental material.  
 
 ```{r descriptive-statistics-table}
 
@@ -216,10 +218,11 @@ Participants exhibiting no measurable SCR (i.e., ISCR scores of zero) in more th
 
 # Calculate percentage of zero responses (based on all trials)
 zero_responses <- single_trial_data[!is.na(single_trial_data$iscr_gng_resp), ] %>%
-  group_by(participant_id) %>%
+  dplyr::group_by(participant_id) %>%
   dplyr::summarize(
     percentage_zero_responses = length(participant_id[iscr_gng_resp == 0]) / length(participant_id) * 100
-  )
+  ) %>%
+  dplyr::ungroup()
 
 
 percentage_zero_responses_mean <- round(mean(zero_responses$percentage_zero_responses), digits = 2)
@@ -243,7 +246,7 @@ For details on contrast coding and the procedure used to specify the random-effe
 
 As for a factor with n levels, only n − 1 factor levels can be compared in a model, we computed two models to allow all pairwise comparisons of response types to be tested. The first model compared fast hits separately with both other response types. The second model compared false alarms with slow hits and it also compared fast hits with false alarms. The latter contrast was mathematically equivalent to one of the contrasts in the first model. The model containing the maximal random-effects structure was used. 
 <br><br>
-This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S5 in the supplemental material.  
+This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S10 in the supplemental material.  
 
 ```{r SCR-LMM-final-model-1}
 
@@ -299,7 +302,7 @@ Participants exhibited a higher SCR following false alarms than following fast h
 
 #### Run second model 
 
-This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S5 in the supplemental material.  
+This table corresponds to the results section "Skin Conductance Response" in the manuscript and Table S10 in the supplemental material.  
 
 ```{r SCR-LMM-final-model-2}
 
@@ -365,9 +368,9 @@ print(VarCorr(LMM_scr_2), digits = 2, comp = "Std.Dev.")
 Participants exhibited a higher SCR following false alarms than following slow hits. 
 <br><br><br>
 
-### SCR - affective priming
+### SCR - affective priming/PES
 
-To test the association between autonomic arousal and affective priming effect, we included the square root-transformed and z-standardized SCR as continuous predictor in the LMM used to analyze word categorization RT. The analysis was comparable to the LMM on word categorization RT, except for the specified levels of the fixed factor response type (slow hit, fast hit, false alarm, but not inhibited response) and the reduced number of observations entering the analysis due to the trial selection criteria for SCR analyses. 
+To test the association between autonomic arousal and affective priming effect and between autonomic arousal and PES, we included the square root-transformed and *z*-standardized SCR as continuous predictor in the LMM used to analyze word categorization RT. The analysis was comparable to the LMM on word categorization RT, except for the specified levels of the fixed factor response type (slow hit, fast hit, false alarm, but not inhibited response) and the reduced number of observations entering the analysis due to the trial selection criteria for SCR analyses. 
 
 ```{r SCR-priming-LMM-contrast-coding}
 
@@ -512,13 +515,116 @@ tab_model(LMM_scr_priming_nested,
 Only for false alarms, but not for the other response types, an enhanced SCR was related to slower responses to words. We previously reported that false alarms were associated with PES in the subsequent word categorization. Taken together, these results suggest that following false alarms, SCR positively predicted PES. 
 <br><br><br>
 
-#### Plot PES - SCR effect
+#### SCR - PES (go/no-go task)
 
-This figure corresponds to Figure 4 in the manuscript. The plot shows the predicted values (marginal effects) for the response type x SCR interation of the LMM. 
+To test whether there was PES also in the subsequent go/no-go trial and whether its magnitude was predicted by SCR, we additionally fitted a LMM on PES with the *z*-standardized SCR as predictor and by-participant random effects. We calculated single-trial values of PES by quantifying the RT difference between correct trials preceding and following an error (Dutilh et al., 2012). Errors were included in this analysis only if they were preceded by at least two correct responses and followed by at least one correct response.
+<br>
+This table corresponds to the results section "Relation Between Post-Error Slowing and Skin Conductance Response" in the manuscript and Table S11 in the supplemental material.  
+ 
+```{r SCR-pes-gng-LMM}
 
-```{r plot-pes-scr-original, cache = knitr_cache_enabled, fig.cap = "Note. Estimated interaction effects of SCR and response type in the go/no-go task on word categorization RT. RT values are displayed on an inverse scale, standardized SCR values on a square root scale. The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. Shaded areas represent 95% confidence intervals."}
+# Create column with single-trial PES (RT post-error − RT pre-error for all CCEC sequences) 
+single_trial_data$pes <- NA
+for (i in 3:(nrow(single_trial_data) - 1)) {
+  if (
+      # Trial N must be FA
+      single_trial_data[i, ]$gng_response_type == "FA" &
+      # Trial N-1 and N+1 must be SH or FH (IR not included here as RT value is required for PES calculation and IR has no such)
+      (single_trial_data[(i + 1), ]$gng_response_type == "SH" | single_trial_data[(i + 1), ]$gng_response_type == "FH") &
+      (single_trial_data[(i - 1), ]$gng_response_type == "SH" | single_trial_data[(i - 1), ]$gng_response_type == "FH") &
+      # Trial N-2 must be correct (i.e., SH, FH, or IR)
+      single_trial_data[(i - 2), ]$gng_response_type != "FA" &
+      single_trial_data[(i - 2), ]$gng_response_type != "wrong_key" &
+      single_trial_data[(i - 2), ]$gng_response_type != "miss" &
+      # Trial N, N+1, and N-1 must have valid gng rt (to have valid FA and valid RTs for PES calculation)
+      single_trial_data[(i + 1), ]$gng_rt_invalid  == FALSE &
+      single_trial_data[(i - 1), ]$gng_rt_invalid  == FALSE &
+      single_trial_data[(i    ), ]$gng_rt_invalid  == FALSE &
+      # Trial N-2 must have correct word response to avoid PES effect on gng RT in trial N-1
+      single_trial_data[(i - 2), ]$word_accuracy == "correct" &
+      # Trial N-1 and N+1 must be directly preceding / following the error (just to make sure; should be the case,
+      # as full/unfiltered data set is used here and errors in first/last trial of each participant are excluded below)
+      single_trial_data[(i + 1), ]$trial - single_trial_data[(i - 1), ]$trial == 2
+  ) {
+    # Calculate RT post-error minus RT pre-error
+    single_trial_data[i, ]$pes <- (single_trial_data[(i + 1), ]$gng_rt) - (single_trial_data[(i - 1), ]$gng_rt)
+  }
+}
 
-# Respecify LMM without interactions stated with ":" in random structure (because plot_model does not like that) 
+
+# For each last and first and trial in a block, PES cannot be determined -> set these values to NA
+single_trial_data[single_trial_data$trial == 1  | single_trial_data$trial == 28  | 
+                  single_trial_data$trial == 29 | single_trial_data$trial == 100 | 
+                  single_trial_data$trial == 101| single_trial_data$trial == 172 | 
+                  single_trial_data$trial == 173| single_trial_data$trial == 200 | 
+                  single_trial_data$trial == 201| single_trial_data$trial == 272 | 
+                  single_trial_data$trial == 273| single_trial_data$trial == 344 | 
+                  single_trial_data$trial == 345| single_trial_data$trial == 372 | 
+                  single_trial_data$trial == 373| single_trial_data$trial == 444 | 
+                  single_trial_data$trial == 445| single_trial_data$trial == 516, "pes"] <- NA
+
+
+# Density plot and q-q plot for PES values -> PES normally distributed, no transformation necessary
+# par(mfrow = c(2, 2)) # arrange plots
+# plot(density(single_trial_data[!is.na(single_trial_data$pes), ]$pes), main = "PES: Density  Plot")
+# qqnorm(single_trial_data[!is.na(single_trial_data$pes), ]$pes, main = "PES: Q-Q Plot", pch = 1, frame = FALSE)
+# par(mfrow = c(1, 1)) # reset layout
+
+
+# Box–Cox procedure: lambda = 0.87, suggesting that no transformation is necessary (for lambda around 1)
+# bc_pes <- boxcox(pes + 400 ~ 1, data = single_trial_data[!is.na(single_trial_data$pes), ])
+# optlambda_pes <- bc_pes$x[which.max(bc_pes$y)]
+
+
+# Calculate standardized square root transformed SCR for trials entering PES LMM (predictor must be standardized)
+single_trial_data$iscr_gng_resp_sqrt_z_pes <- NA
+single_trial_data[!is.na(single_trial_data$pes), ] <- single_trial_data[!is.na(single_trial_data$pes), ] %>%
+  dplyr::group_by(participant_id) %>%
+  dplyr::mutate(iscr_gng_resp_sqrt_z_pes = scale(sqrt(iscr_gng_resp), center = TRUE, scale = TRUE)) %>%
+  dplyr::ungroup()
+
+
+# Run model
+LMM_scr_pes <- lmer(pes ~ iscr_gng_resp_sqrt_z_pes +
+  (1 | participant_id),
+data = single_trial_data,
+REML = TRUE,
+control = lmerControl(optimizer = "bobyqa")
+)
+
+
+# Check model output
+# summary(LMM_scr_pes) # Model does converge, no singular fit
+
+
+# Re-check PCA of random-effects variance-covariance estimates
+# summary(rePCA(LMM_scr_pes)) # All terms explain variance
+
+
+# Display results (fixed effects)
+tab_model(LMM_scr_pes,
+  dv.labels = "PES (robust) in the go/no-go task", pred.labels = c("(Intercept)" = "Intercept", "iscr_gng_resp_sqrt_z_pes" = "SCR"),
+  show.stat = TRUE, show.icc = FALSE, show.r2 = FALSE,
+  show.re.var = FALSE, show.ngroups = FALSE, string.est = "b", string.stat = "t value",
+  string.ci = "95 % CI", string.p = "p value",  p.val = "satterthwaite"
+)
+
+
+# Display random effects
+print("Random effects:")
+print(VarCorr(LMM_scr_pes), digits = 4, comp = "Std.Dev.")
+```
+The analysis yielded a significant intercept, indicating that following false alarms, there was PES also in the subsequent go/no-go trial. Additionally, there was a significant main effect of SCR, indicating that SCR predicted this slowing on a trial-by-trial level.
+<br><br><br>
+
+#### Plot relation PES - SCR 
+
+This figure corresponds to Figure 4 in the manuscript. The plot shows the predicted values (marginal effects) for the relation between skin conductance response (SCR) and post-error slowing (PES). 
+
+```{r plot-pes-scr, cache = knitr_cache_enabled, fig.width = 8, fig.cap = "Note. (A) Estimated interaction effects of SCR and response type in the go/no-go task (SH = slow hit; FH = fast hit; FA = false alarm) on word categorization response time (RT). The slope is significant only for false alarms, indicating that following incorrect responses, an enhanced SCR is associated with slower responses to words and hence more post-error slowing. (B) Estimated effect of SCR on PES in the go/no-go task. PES was quantified using the method proposed by Dutilh et al. (2012). Shaded areas represent 95% confidence intervals. SQRT = square root."}
+
+
+# Respecify priming LMM without interactions stated with ":" in random structure (because plot_model does not like that) 
 # Also enter fixed effects as factors, not contrasts (to have all factor levels in the plot)
 # Double bar syntax for zero-correlation parameter model won't work anymore (full model still converges, no singular fit)
 LMM_scr_priming_plot <- lmer(word_rt_inverse ~ gng_response_type * word_valence * iscr_gng_resp_sqrt_z +
@@ -530,13 +636,13 @@ control = lmerControl(optimizer = "bobyqa")
 )
 
 
-# Plot marginal effects
-plot_model(LMM_scr_priming_plot, 
-           type   = "pred", 
-           terms  = c("iscr_gng_resp_sqrt_z", "gng_response_type"), 
-           ci.lvl = .95) +
+# Create plot marginal effects PES (word categorization) - SCR
+plot_scr_pes_word <- plot_model(LMM_scr_priming_plot,
+                                type   = "pred",
+                                terms  = c("iscr_gng_resp_sqrt_z", "gng_response_type"),
+                                ci.lvl = .95) +
   labs(title = NULL, 
-       x     = "Standardized Square Root-Transformed SCR (µS)", 
+       x     = "SCR (Standardized SQRT-Transformed [µS])", 
        y     = "Word Categorization RT (−1000/RT[ms])") +
   my_figure_theme +
   aes(linetype = group, color = group) + 
@@ -547,10 +653,127 @@ plot_model(LMM_scr_priming_plot,
   scale_x_continuous(breaks=seq(-4, 6, 2),      limits = c(-4, 6),    expand = c(0,0))
 
 
-# ggsave("figure_scr_pes.tiff",width = 11, height = 13 , units = "cm", dpi = 600, compression = "lzw")
-```
-<br><br><br>
+# Create plot marginal effects PES (go/no-go) - SCR
+plot_scr_pes_gng <- plot_model(LMM_scr_pes, 
+                               type   = "pred",
+                               terms  = c("iscr_gng_resp_sqrt_z_pes"),
+                               ci.lvl = .95) +
+  labs(title = NULL, 
+       x     = "SCR (Standardized SQRT-Transformed [µS])", 
+       y     = "PES in the Go/No-Go Task (ms)") +
+  my_figure_theme +
+  aes(color = group, fill = group) + 
+  scale_color_manual(values = "#024b79") +
+  scale_fill_manual(values  = "#024b79") +
+  theme(axis.ticks.x = NULL) + 
+  scale_y_continuous(breaks=seq(-40, 100, 20), limits = c(-40, 100), expand = c(0,0)) +
+  scale_x_continuous(breaks=seq(-3, 4, 1),     limits = c(-3, 4),    expand = c(0,0)) + 
+  theme(legend.position = "none") 
 
+
+# Arrange plots
+figure_scr_pes <- ggdraw() +
+  draw_plot(plot_scr_pes_word, x =  0,   y = 0,    width = .5, height = 0.9)   +
+  draw_plot(plot_scr_pes_gng,  x = .5,   y = .184, width = .5, height = 0.718) +
+  draw_plot_label(c("A", "B"), c(0, 0.5), c(1, 1), size = 15)
+
+
+# Save plot
+# ggsave("figure_scr_pes.tiff", width = 20, height = 12 , units = "cm", dpi=600, compression = "lzw")
+
+
+# Display plot
+figure_scr_pes
+```
+<br>
+
+## Correlations
+***
+
+We calculated correlations between priming effect and SCR (for FA and FH) and between SCR and PES. PES was quantified as the error-related slowing in the subsequent go/no-go trial using the method proposed by Dutilh et al. (2012). 
+
+```{r correlations}
+
+# Calculate individual score for priming (after FA and FH)
+priming <- single_trial_data %>%
+  # Apply trial exclusion criteria for priming effect
+  dplyr::filter(
+    word_accuracy == "correct" &
+    (is.na(gng_rt_invalid)  | gng_rt_invalid  == FALSE) &
+    (is.na(word_rt_outlier) | word_rt_outlier == FALSE)) %>%
+  # Calculate mean per participant
+  dplyr::group_by(participant_id) %>%
+  dplyr::summarize(
+    pos_after_FA     = mean(word_rt[gng_response_type == "FA" & word_valence == "pos"], na.rm = TRUE),
+    neg_after_FA     = mean(word_rt[gng_response_type == "FA" & word_valence == "neg"], na.rm = TRUE),
+    priming_after_FA = pos_after_FA - neg_after_FA,
+    pos_after_FH     = mean(word_rt[gng_response_type == "FH" & word_valence == "pos"], na.rm = TRUE),
+    neg_after_FH     = mean(word_rt[gng_response_type == "FH" & word_valence == "neg"], na.rm = TRUE),
+    priming_after_FH = neg_after_FH - pos_after_FH) %>%
+  dplyr::mutate(participant_id = factor(participant_id)) %>%
+  dplyr::ungroup()
+
+
+# Calculate individual score for SCR (after FA)
+SCR_z_FA <- single_trial_data_scr %>%
+  # Necessary to make contrast columns having same name unique 
+  setNames(make.unique(names(.))) %>%
+  # Select only FA trials
+  dplyr::filter(gng_response_type == "FA") %>%
+  # Scale SCR for this data subset
+  dplyr::group_by(participant_id) %>%
+  dplyr::mutate(iscr_gng_resp_z_FA = scale(iscr_gng_resp, center = TRUE, scale = TRUE)) %>%
+  # Calculate mean per participant
+  dplyr::summarize(SCR_z_FA = mean(iscr_gng_resp_z_FA, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+
+# Calculate individual score for SCR (after FH)
+SCR_z_FH <- single_trial_data_scr %>%
+  # Necessary to make contrast columns having same name unique 
+  setNames(make.unique(names(.))) %>%
+  # Select only FH trials
+  dplyr::filter(gng_response_type == "FH") %>%
+  # Scale SCR for this data subset
+  dplyr::group_by(participant_id) %>%
+  dplyr::mutate(iscr_gng_resp_z_FH = scale(iscr_gng_resp, center = TRUE, scale = TRUE)) %>%
+  # Calculate mean per participant 
+  dplyr::summarize(SCR_z_FH = mean(iscr_gng_resp_z_FH, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+
+# Calculate individual score for robust PES 
+PES_gng <- single_trial_data %>%
+  dplyr::filter(!is.na(pes)) %>%
+  dplyr::group_by(participant_id) %>%
+  dplyr::summarize(PES_gng = mean(pes, na.rm = TRUE)) %>%
+  dplyr::mutate(participant_id = factor(participant_id)) %>%
+  dplyr::ungroup()
+
+
+# Create dataframe for correlations
+df_correlations <- left_join(priming, SCR_z_FA,         by = "participant_id")
+df_correlations <- left_join(df_correlations, SCR_z_FH, by = "participant_id")
+df_correlations <- left_join(df_correlations, PES_gng,  by = "participant_id")
+
+
+# Calculate correlations
+corr_priming_FA_scr <- cor.test(df_correlations$priming_after_FA, df_correlations$SCR_z_FA)
+corr_priming_FH_scr <- cor.test(df_correlations$priming_after_FH, df_correlations$SCR_z_FH)
+corr_pes_scr        <- cor.test(df_correlations$PES_gng,          df_correlations$SCR_z_FA)
+
+
+# Dispay correlations
+my_table_template(rbind(cbind("Priming - SCR for FA", round(corr_priming_FA_scr$estimate, digits = 2),
+                              corr_priming_FA_scr$parameter, round(corr_priming_FA_scr$p.value, digits = 3)),
+                        cbind("Priming - SCR for FH", round(corr_priming_FH_scr$estimate, digits = 2),
+                              corr_priming_FH_scr$parameter, round(corr_priming_FH_scr$p.value, digits = 3)),
+                        cbind("PES and error-related SCR", round(corr_pes_scr$estimate, digits = 2),
+                              corr_pes_scr$parameter, round(corr_pes_scr$p.value, digits = 3))),
+                  col_names = c("", "r", "df", "p value"))
+```
+There was no significant correlation between priming effect and SCR or between error-related SCR and PES at the between-participant level.
+<br><br><br>
 
 ## Control Analyses
 ***
@@ -733,6 +956,7 @@ SCR in trials beginning with a red compared to those with a white fixation cross
 
 ## References
 ***
+Dutilh, G., van Ravenzwaaij, D., Nieuwenhuis, S., van der Maas, H. L., Forstmann, B. U., & Wagenmakers, E. J. (2012). How to measure post-error slowing: A confound and a simple solution. *Journal of Mathematical Psychology, 56*(3), 208-216. doi:10.1016/j.jmp.2012.04.001 <br><br>
 Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology, 49*(4), 764-766. https://doi.org/10.1016/j.jesp.2013.03.013 <br><br> 
 Morey, R. (2008). Confidence intervals from normalized data: A correction to Cousineau (2005). *Tutorials in Quantitative Methods for Psychology, 4*(2), 61-64. https://doi.org/10.20982/tqmp.04.2.p061 <br><br>
 <br>
