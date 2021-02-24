@@ -115,7 +115,7 @@ Trials were excluded from all analyses if RT in the go/no-go task was shorter th
 
 # Calculate percentage of excluded trials
 excluded_trials <- single_trial_data %>%
-  group_by(participant_id) %>%
+  dplyr::group_by(participant_id) %>%
   dplyr::summarize(
     below_100_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt < 100) / length(participant_id) * 100,
     above_700_ms   = sum(!is.na(gng_rt_invalid) & gng_rt_invalid != FALSE & gng_rt > 700) / length(participant_id) * 100,
@@ -127,7 +127,8 @@ excluded_trials <- single_trial_data %>%
     word_wrong_key = sum(word_accuracy == "wrong_key")     / length(participant_id) * 100
   ) %>% 
   # Calculate M and SD of the variables
-  dplyr::summarise_each(list(mean,sd), -participant_id)
+  dplyr::summarise_each(list(mean,sd), -participant_id) %>%
+  dplyr::ungroup()
 
 
 # Create dataframe with rows for M and SD for display
@@ -293,12 +294,13 @@ To obtain a sufficient number of false alarms in the go/no-go task, an individua
 # Calculate FH time
 FH_time <- single_trial_data_priming %>%
   dplyr::filter(gng_response_type == "FH" | gng_response_type == "SH") %>%
-  group_by(participant_id) %>%
+  dplyr::group_by(participant_id) %>%
   dplyr::summarize(
     FH_1 = mean(gng_rt[trial <= 28])                 - (mean(gng_rt[trial <= 28])                 * 20) / 100,
     FH_2 = mean(gng_rt[trial >= 173 & trial <= 200]) - (mean(gng_rt[trial >= 173 & trial <= 200]) * 10) / 100,
     FH_3 = mean(gng_rt[trial >= 345 & trial <= 372]) - (mean(gng_rt[trial >= 345 & trial <= 372]) * 10) / 100
-  )
+  ) %>%
+  dplyr::ungroup()
 
 
 FH_time_mean <- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 0)
@@ -840,11 +842,12 @@ To facilitate comparison with previously reported results obtained using a simil
 
 # Get data in correct format for ANOVAs (aggregate within participants per condition)
 data_anova <- single_trial_data_priming %>%
-  group_by(participant_id, gng_response_type, word_valence) %>%
+  dplyr::group_by(participant_id, gng_response_type, word_valence) %>%
   dplyr::summarize(
     word_rt_inverse              = mean(word_rt_inverse[word_accuracy == "correct"]),
     percentage_correct_responses = sum(word_accuracy_numeric) / length(participant_id) * 100
-  )
+  ) %>%
+  dplyr::ungroup()
 
 
 # ANOVA RT

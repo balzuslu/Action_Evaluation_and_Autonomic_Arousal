@@ -474,7 +474,7 @@ descriptive_statistics_rt &lt;- summarySEwithinO(
 
 # Prepare calculation of descriptive statistics for proportion of response types (based on all trials)
 descriptive_statistics_proportion &lt;- single_trial_data %&gt;%
-  group_by(participant_id) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
   dplyr::summarize(
     gng_SH         = sum(gng_response_type == &quot;SH&quot;)        / length(participant_id) * 100,
     gng_FH         = sum(gng_response_type == &quot;FH&quot;)        / length(participant_id) * 100,
@@ -482,7 +482,8 @@ descriptive_statistics_proportion &lt;- single_trial_data %&gt;%
     gng_IR         = sum(gng_response_type == &quot;IR&quot;)        / length(participant_id) * 100,
     gng_misses     = sum(gng_response_type == &quot;miss&quot;)      / length(participant_id) * 100,
     gng_wrong_key  = sum(gng_response_type == &quot;wrong_key&quot;) / length(participant_id) * 100,
-  )
+  ) %&gt;%
+  dplyr::ungroup()
 
 
 # Calculate descriptive statistics for proportion (exclude first column containing participant ID)
@@ -764,10 +765,11 @@ Post-error accuracy
 <pre class="r"><code># Calculate number of false alarms (based on all trials)
 FAs &lt;- single_trial_data %&gt;%
   dplyr::filter(gng_response_type == &quot;FA&quot;) %&gt;%
-  group_by(participant_id) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
   dplyr::summarize(
     number_FAs = n()
-  )
+  ) %&gt;%
+  dplyr::ungroup()
 
 
 FA_mean &lt;- round(mean(FAs$number_FAs), digits = 2)

@@ -107,7 +107,7 @@ descriptive_statistics_rt <- summarySEwithinO(
 
 # Prepare calculation of descriptive statistics for proportion of response types (based on all trials)
 descriptive_statistics_proportion <- single_trial_data %>%
-  group_by(participant_id) %>%
+  dplyr::group_by(participant_id) %>%
   dplyr::summarize(
     gng_SH         = sum(gng_response_type == "SH")        / length(participant_id) * 100,
     gng_FH         = sum(gng_response_type == "FH")        / length(participant_id) * 100,
@@ -115,7 +115,8 @@ descriptive_statistics_proportion <- single_trial_data %>%
     gng_IR         = sum(gng_response_type == "IR")        / length(participant_id) * 100,
     gng_misses     = sum(gng_response_type == "miss")      / length(participant_id) * 100,
     gng_wrong_key  = sum(gng_response_type == "wrong_key") / length(participant_id) * 100,
-  )
+  ) %>%
+  dplyr::ungroup()
 
 
 # Calculate descriptive statistics for proportion (exclude first column containing participant ID)
@@ -198,10 +199,11 @@ The paradigm was effective in fostering a sufficient number of false alarms.
 # Calculate number of false alarms (based on all trials)
 FAs <- single_trial_data %>%
   dplyr::filter(gng_response_type == "FA") %>%
-  group_by(participant_id) %>%
+  dplyr::group_by(participant_id) %>%
   dplyr::summarize(
     number_FAs = n()
-  )
+  ) %>%
+  dplyr::ungroup()
 
 
 FA_mean <- round(mean(FAs$number_FAs), digits = 2)

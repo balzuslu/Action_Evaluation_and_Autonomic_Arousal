@@ -446,7 +446,7 @@ single_trial_data_priming$participant_id    &lt;- factor(single_trial_data_primi
 <p>Trials were excluded from all analyses if RT in the go/no-go task was shorter than 100 ms or longer than 700 ms, or if the word categorization RT was more than three median absolute deviations (Leys et al., 2013) above or below a participant’s median RT computed per condition. We further discarded trials in which responses in the go/no-go task were missing or performed with one of the word categorization keys. In the analysis of word categorization RT, only trials with correct word categorization responses were considered. In the analysis of word categorization accuracy, trials with correct or incorrect word categorization were included, but not trials with missing categorization responses or responses performed with the key to be pressed to go stimuli.</p>
 <pre class="r"><code># Calculate percentage of excluded trials
 excluded_trials &lt;- single_trial_data %&gt;%
-  group_by(participant_id) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
   dplyr::summarize(
     below_100_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &lt; 100) / length(participant_id) * 100,
     above_700_ms   = sum(!is.na(gng_rt_invalid) &amp; gng_rt_invalid != FALSE &amp; gng_rt &gt; 700) / length(participant_id) * 100,
@@ -458,7 +458,8 @@ excluded_trials &lt;- single_trial_data %&gt;%
     word_wrong_key = sum(word_accuracy == &quot;wrong_key&quot;)     / length(participant_id) * 100
   ) %&gt;% 
   # Calculate M and SD of the variables
-  dplyr::summarise_each(list(mean,sd), -participant_id)
+  dplyr::summarise_each(list(mean,sd), -participant_id) %&gt;%
+  dplyr::ungroup()
 
 
 # Create dataframe with rows for M and SD for display
@@ -943,12 +944,13 @@ Note. (A) RT and (B) accuracy in the word categorization task are shown as a fun
 <pre class="r"><code># Calculate FH time
 FH_time &lt;- single_trial_data_priming %&gt;%
   dplyr::filter(gng_response_type == &quot;FH&quot; | gng_response_type == &quot;SH&quot;) %&gt;%
-  group_by(participant_id) %&gt;%
+  dplyr::group_by(participant_id) %&gt;%
   dplyr::summarize(
     FH_1 = mean(gng_rt[trial &lt;= 28])                 - (mean(gng_rt[trial &lt;= 28])                 * 20) / 100,
     FH_2 = mean(gng_rt[trial &gt;= 173 &amp; trial &lt;= 200]) - (mean(gng_rt[trial &gt;= 173 &amp; trial &lt;= 200]) * 10) / 100,
     FH_3 = mean(gng_rt[trial &gt;= 345 &amp; trial &lt;= 372]) - (mean(gng_rt[trial &gt;= 345 &amp; trial &lt;= 372]) * 10) / 100
-  )
+  ) %&gt;%
+  dplyr::ungroup()
 
 
 FH_time_mean &lt;- round((mean(FH_time$FH_1) + mean(FH_time$FH_2) + mean(FH_time$FH_3)) / 3, digits = 0)
@@ -3104,11 +3106,12 @@ Observations
 
 # Get data in correct format for ANOVAs (aggregate within participants per condition)
 data_anova &lt;- single_trial_data_priming %&gt;%
-  group_by(participant_id, gng_response_type, word_valence) %&gt;%
+  dplyr::group_by(participant_id, gng_response_type, word_valence) %&gt;%
   dplyr::summarize(
     word_rt_inverse              = mean(word_rt_inverse[word_accuracy == &quot;correct&quot;]),
     percentage_correct_responses = sum(word_accuracy_numeric) / length(participant_id) * 100
-  )
+  ) %&gt;%
+  dplyr::ungroup()
 
 
 # ANOVA RT
@@ -4057,14 +4060,14 @@ loaded via a namespace (and not attached):
 [52] forcats_0.4.0       crayon_1.3.4        lattice_0.20-38    
 [55] ggeffects_0.15.1    haven_2.2.0         splines_3.6.1      
 [58] sjstats_0.17.8      hms_0.5.2           pillar_1.4.6       
-[61] boot_1.3-22         estimability_1.3    reshape2_1.4.3     
-[64] glue_1.3.1          evaluate_0.14       data.table_1.12.6  
-[67] renv_0.12.0         modelr_0.1.5        vctrs_0.3.4        
-[70] nloptr_1.2.1        cellranger_1.1.0    gtable_0.3.0       
-[73] purrr_0.3.3         tidyr_1.0.0         assertthat_0.2.1   
-[76] xfun_0.16           openxlsx_4.1.3      xtable_1.8-4       
-[79] broom_0.5.2         viridisLite_0.3.0   tibble_3.0.4       
-[82] ellipsis_0.3.0     </code></pre>
+[61] boot_1.3-22         estimability_1.3    codetools_0.2-16   
+[64] reshape2_1.4.3      glue_1.3.1          evaluate_0.14      
+[67] data.table_1.12.6   renv_0.12.0         modelr_0.1.5       
+[70] vctrs_0.3.4         nloptr_1.2.1        cellranger_1.1.0   
+[73] gtable_0.3.0        purrr_0.3.3         tidyr_1.0.0        
+[76] assertthat_0.2.1    xfun_0.16           openxlsx_4.1.3     
+[79] xtable_1.8-4        broom_0.5.2         viridisLite_0.3.0  
+[82] tibble_3.0.4        ellipsis_0.3.0     </code></pre>
 </div>
 
 
