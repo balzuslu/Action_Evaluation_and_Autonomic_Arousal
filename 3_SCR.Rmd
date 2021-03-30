@@ -815,19 +815,19 @@ summary(LMM_scr_word_valence_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
-summary(rePCA(LMM_scr_word_valence_red1)) # For participant and word stimuli there are two terms each that do not explain variance (< 0.5%)
+summary(rePCA(LMM_scr_word_valence_red1)) # For participant and word stimuli there are terms that do not explain variance (< 0.5%)
 
 
 # Check which random effect explains near zero variance
-print(VarCorr(LMM_scr_word_valence_red1), comp = "Variance") # It is pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word stimuli
+print(VarCorr(LMM_scr_word_valence_red1), comp = "Variance") # It is pos_neg for participant and intercept and FA_FH for word stimuli
 ```
 
 ```{r SCR-valence-LMM-final-model}
 
 #### 3) Run final model without random terms explaining zero variance 
-# (i.e., remove pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word)
+# (i.e., remove pos_neg for participant and intercept and FA_FH for word)
 LMM_scr_word_valence_final <- lmer(iscr_gng_resp_sqrt ~ gng_response_type * word_valence +
-  (1 + FH_SH + FA_FH + FH_SH:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + FH_SH:pos_neg + FA_FH:pos_neg || participant_id) +
   (0 + FH_SH || word),
 data = single_trial_data_scr,
 REML = TRUE,
@@ -912,18 +912,18 @@ summary(LMM_scr_cross_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
-summary(rePCA(LMM_scr_cross_red1)) # For participant there is one term that does not explain variance (< 0.5%)
+summary(rePCA(LMM_scr_cross_red1)) # For participant there is are terms that do not explain variance (< 0.5%)
 
 
 # Check which random effect explains near zero variance
-print(VarCorr(LMM_scr_cross_red1), comp = "Variance") # It is FA_FH:red_white for participant
+print(VarCorr(LMM_scr_cross_red1), comp = "Variance") 
 ```
 
 ``` {r SCR-fixcross-LMM-final-model}
 
-#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH:red_white for participant)
+#### 3) Run final model without random terms explaining zero variance 
 LMM_scr_cross_final <- lmer(iscr_gng_resp_sqrt ~ FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white  + 
-  (1 + FH_SH + FA_FH + red_white + FH_SH:red_white || participant_id), 
+  (1 + FH_SH + FA_FH + red_white || participant_id), 
 data = single_trial_data_scr, 
 REML = TRUE, 
 control = lmerControl(optimizer="bobyqa")

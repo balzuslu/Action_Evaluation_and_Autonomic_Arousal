@@ -528,10 +528,10 @@ M
 SH
 </td>
 <td style="text-align:right;">
--0.06
+-0.07
 </td>
 <td style="text-align:left;">
-[-0.1, -0.03]
+[-0.11, -0.03]
 </td>
 </tr>
 <tr>
@@ -550,10 +550,10 @@ FH
 FA
 </td>
 <td style="text-align:right;">
-0.31
+0.32
 </td>
 <td style="text-align:left;">
-[0.21, 0.4]
+[0.22, 0.41]
 </td>
 </tr>
 </tbody>
@@ -621,7 +621,7 @@ percentage_zero_responses_mean &lt;- round(mean(zero_responses$percentage_zero_r
 percentage_zero_responses_sd   &lt;- round(sd(zero_responses$percentage_zero_responses),   digits = 2)
 percentage_zero_responses_min  &lt;- round(min(zero_responses$percentage_zero_responses),  digits = 2)
 percentage_zero_responses_max  &lt;- round(max(zero_responses$percentage_zero_responses),  digits = 2)</code></pre>
-<p>Percentage of zero responses: <em>M</em> = 13.28%, <em>SD</em> = 7.92%, range = 4.65–34.88% <br><br><br></p>
+<p>Percentage of zero responses: <em>M</em> = 10.4%, <em>SD</em> = 6.91%, range = 3.1–29.65% <br><br><br></p>
 </div>
 </div>
 <div id="lmm-analysis" class="section level2">
@@ -710,13 +710,13 @@ p value
 Intercept
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.41
+0.42
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.36 – 0.47
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-14.99
+15.39
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -733,10 +733,10 @@ FH - SH
 -0.00 – 0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-1.77
+1.78
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.087
+0.085
 </td>
 </tr>
 <tr>
@@ -747,10 +747,10 @@ FA - FH
 0.11
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.05 – 0.17
+0.05 – 0.16
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3.58
+3.72
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>0.001</strong>
@@ -767,10 +767,10 @@ Observations
 </table>
 <pre><code>[1] &quot;Random effects:&quot;
  Groups         Name        Std.Dev. Corr       
- participant_id (Intercept) 0.149               
-                FH_SH       0.029    -0.10      
-                FA_FH       0.151     0.58 -0.41
- Residual                   0.284               </code></pre>
+ participant_id (Intercept) 0.147               
+                FH_SH       0.031    -0.03      
+                FA_FH       0.141     0.62 -0.40
+ Residual                   0.272               </code></pre>
 <p>Participants exhibited a higher SCR following false alarms than following fast hits. A statistical trend was observed for fast hits being related to a higher SCR compared to slow hits. <br><br><br></p>
 </div>
 <div id="run-second-model" class="section level4">
@@ -865,13 +865,13 @@ p value
 Intercept
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.41
+0.42
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.36 – 0.47
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-14.99
+15.39
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -885,10 +885,10 @@ FA - SH
 0.12
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.07 – 0.18
+0.07 – 0.17
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-4.38
+4.60
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -902,10 +902,10 @@ FH - FA
 -0.11
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.17 – -0.05
+-0.16 – -0.05
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--3.58
+-3.72
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>0.001</strong>
@@ -923,9 +923,9 @@ Observations
 <pre><code>[1] &quot;Random effects:&quot;
  Groups         Name        Std.Dev. Corr       
  participant_id (Intercept) 0.15                
-                FA_SH       0.14      0.60      
-                FH_FA       0.15     -0.58 -0.98
- Residual                   0.28                </code></pre>
+                FA_SH       0.13      0.65      
+                FH_FA       0.14     -0.62 -0.98
+ Residual                   0.27                </code></pre>
 <p>Participants exhibited a higher SCR following false alarms than following slow hits. <br><br><br></p>
 </div>
 </div>
@@ -1067,7 +1067,7 @@ Intercept
 -1.81 – -1.62
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--36.19
+-36.20
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1084,10 +1084,10 @@ FH - SH
 -0.04 – 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--1.47
+-1.45
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.152
+0.157
 </td>
 </tr>
 <tr>
@@ -1101,7 +1101,7 @@ FA - FH
 0.16 – 0.29
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-6.94
+6.91
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1118,10 +1118,10 @@ Pos - Neg
 -0.05 – 0.05
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.05
+-0.07
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.956
+0.948
 </td>
 </tr>
 <tr>
@@ -1135,10 +1135,10 @@ FH - SH x Pos - Neg
 -0.09 – -0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--2.05
+-2.06
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>0.049</strong>
+<strong>0.048</strong>
 </td>
 </tr>
 <tr>
@@ -1146,13 +1146,13 @@ FH - SH x Pos - Neg
 FA - FH x Pos - Neg
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.36
+0.35
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.26 – 0.45
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-7.02
+7.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1186,10 +1186,10 @@ Pos - Neg x SCR
 -0.02 – 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.00
+-0.06
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.998
+0.952
 </td>
 </tr>
 <tr>
@@ -1197,16 +1197,16 @@ Pos - Neg x SCR
 FH - SH x SCR
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.01
+-0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 -0.02 – 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.97
+-0.52
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.333
+0.601
 </td>
 </tr>
 <tr>
@@ -1220,7 +1220,7 @@ FA - FH x SCR
 0.01 – 0.06
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3.09
+3.13
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>0.002</strong>
@@ -1231,16 +1231,16 @@ FA - FH x SCR
 FH - SH x Pos - Neg x SCR
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.02
+-0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.05 – 0.02
+-0.04 – 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.97
+-0.87
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.330
+0.382
 </td>
 </tr>
 <tr>
@@ -1251,13 +1251,13 @@ FA - FH x Pos - Neg x SCR
 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.02 – 0.06
+-0.02 – 0.07
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.88
+0.98
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.380
+0.326
 </td>
 </tr>
 <tr>
@@ -1271,13 +1271,13 @@ Observations
 </table>
 <pre><code>[1] &quot;Random effects:&quot;
  Groups           Name                 Std.Dev.
- word             iscr_gng_resp_sqrt_z 0.008   
- word.1           FA_FH                0.056   
+ word             iscr_gng_resp_sqrt_z 0.009   
+ word.1           FA_FH                0.055   
  word.2           FH_SH                0.032   
  word.3           (Intercept)          0.054   
- participant_id   FA_FH:pos_neg        0.226   
+ participant_id   FA_FH:pos_neg        0.225   
  participant_id.1 FH_SH:pos_neg        0.064   
- participant_id.2 iscr_gng_resp_sqrt_z 0.024   
+ participant_id.2 iscr_gng_resp_sqrt_z 0.025   
  participant_id.3 pos_neg              0.100   
  participant_id.4 FA_FH                0.162   
  participant_id.5 FH_SH                0.051   
@@ -1341,7 +1341,7 @@ Intercept
 -1.81 – -1.62
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--36.19
+-36.20
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1358,10 +1358,10 @@ FH - SH
 -0.04 – 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--1.47
+-1.45
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.152
+0.157
 </td>
 </tr>
 <tr>
@@ -1375,7 +1375,7 @@ FA - FH
 0.16 – 0.29
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-6.94
+6.91
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1392,7 +1392,7 @@ SH: Pos - Neg
 -0.15 – -0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--2.98
+-2.97
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>0.004</strong>
@@ -1409,7 +1409,7 @@ FH: Pos - Neg
 -0.19 – -0.08
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--4.46
+-4.47
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1423,10 +1423,10 @@ FA: Pos - Neg
 0.22
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.14 – 0.31
+0.13 – 0.31
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-5.06
+5.04
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -1443,10 +1443,10 @@ SH: SCR
 -0.01 – 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.69
+0.34
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.496
+0.733
 </td>
 </tr>
 <tr>
@@ -1460,10 +1460,10 @@ FH: SCR
 -0.02 – 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.40
+-0.24
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.691
+0.814
 </td>
 </tr>
 <tr>
@@ -1474,13 +1474,13 @@ FA: SCR
 0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.01 – 0.05
+0.01 – 0.06
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3.01
+3.15
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>0.003</strong>
+<strong>0.002</strong>
 </td>
 </tr>
 <tr>
@@ -1494,10 +1494,10 @@ SH: Pos - Neg x SCR
 -0.02 – 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.33
+0.11
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.739
+0.915
 </td>
 </tr>
 <tr>
@@ -1511,10 +1511,10 @@ FH: Pos - Neg x SCR
 -0.04 – 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.97
+-1.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.331
+0.302
 </td>
 </tr>
 <tr>
@@ -1528,10 +1528,10 @@ FA: Pos - Neg x SCR
 -0.03 – 0.05
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.42
+0.50
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.673
+0.614
 </td>
 </tr>
 <tr>
@@ -1669,10 +1669,10 @@ p value
 Intercept
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-23.24
+23.23
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-14.60 – 31.87
+14.60 – 31.86
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 5.28
@@ -1686,16 +1686,16 @@ Intercept
 SCR
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-8.88
+8.43
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-2.27 – 15.48
+1.82 – 15.04
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-2.63
+2.50
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>0.009</strong>
+<strong>0.013</strong>
 </td>
 </tr>
 <tr>
@@ -1709,8 +1709,8 @@ Observations
 </table>
 <pre><code>[1] &quot;Random effects:&quot;
  Groups         Name        Std.Dev.
- participant_id (Intercept) 15.28   
- Residual                   83.11   </code></pre>
+ participant_id (Intercept) 15.27   
+ Residual                   83.15   </code></pre>
 <p>The analysis yielded a significant intercept, indicating that following false alarms, there was PES also in the subsequent go/no-go trial. Additionally, there was a significant main effect of SCR, indicating that SCR predicted this slowing on a trial-by-trial level. <br><br><br></p>
 </div>
 <div id="plot-relation-pes---scr" class="section level4">
@@ -1889,13 +1889,13 @@ p value
 Priming - SCR for FA
 </td>
 <td style="text-align:left;">
--0.08
+-0.18
 </td>
 <td style="text-align:left;">
 28
 </td>
 <td style="text-align:left;">
-0.681
+0.334
 </td>
 </tr>
 <tr>
@@ -1909,7 +1909,7 @@ Priming - SCR for FH
 28
 </td>
 <td style="text-align:left;">
-0.132
+0.134
 </td>
 </tr>
 <tr>
@@ -1917,13 +1917,13 @@ Priming - SCR for FH
 PES and error-related SCR
 </td>
 <td style="text-align:left;">
--0.05
+-0.01
 </td>
 <td style="text-align:left;">
 28
 </td>
 <td style="text-align:left;">
-0.795
+0.974
 </td>
 </tr>
 </tbody>
@@ -1966,15 +1966,15 @@ summary(LMM_scr_word_valence_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
-summary(rePCA(LMM_scr_word_valence_red1)) # For participant and word stimuli there are two terms each that do not explain variance (&lt; 0.5%)
+summary(rePCA(LMM_scr_word_valence_red1)) # For participant and word stimuli there are terms that do not explain variance (&lt; 0.5%)
 
 
 # Check which random effect explains near zero variance
-print(VarCorr(LMM_scr_word_valence_red1), comp = &quot;Variance&quot;) # It is pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word stimuli</code></pre>
+print(VarCorr(LMM_scr_word_valence_red1), comp = &quot;Variance&quot;) # It is pos_neg for participant and intercept and FA_FH for word stimuli</code></pre>
 <pre class="r"><code>#### 3) Run final model without random terms explaining zero variance 
-# (i.e., remove pos_neg and FA_FH:pos_neg for participant and intercept and FA_FH for word)
+# (i.e., remove pos_neg for participant and intercept and FA_FH for word)
 LMM_scr_word_valence_final &lt;- lmer(iscr_gng_resp_sqrt ~ gng_response_type * word_valence +
-  (1 + FH_SH + FA_FH + FH_SH:pos_neg || participant_id) +
+  (1 + FH_SH + FA_FH + FH_SH:pos_neg + FA_FH:pos_neg || participant_id) +
   (0 + FH_SH || word),
 data = single_trial_data_scr,
 REML = TRUE,
@@ -2033,13 +2033,13 @@ p value
 Intercept
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.41
+0.42
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.36 – 0.47
+0.37 – 0.47
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-15.17
+15.60
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -2056,10 +2056,10 @@ FH - SH
 -0.00 – 0.04
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-1.68
+1.74
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.101
+0.091
 </td>
 </tr>
 <tr>
@@ -2067,13 +2067,13 @@ FH - SH
 FA - FH
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.11
+0.10
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.05 – 0.16
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3.72
+3.88
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>0.001</strong>
@@ -2087,13 +2087,13 @@ Pos - Neg
 0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.02 – 0.02
+-0.01 – 0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.05
+0.25
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.964
+0.803
 </td>
 </tr>
 <tr>
@@ -2101,16 +2101,16 @@ Pos - Neg
 FH - SH x Pos - Neg
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.01
+0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 -0.03 – 0.04
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.33
+0.28
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.745
+0.784
 </td>
 </tr>
 <tr>
@@ -2121,13 +2121,13 @@ FA - FH x Pos - Neg
 -0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.07 – 0.02
+-0.06 – 0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--1.02
+-0.82
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.308
+0.417
 </td>
 </tr>
 <tr>
@@ -2142,11 +2142,12 @@ Observations
 <pre><code>[1] &quot;Random effects:&quot;
  Groups           Name          Std.Dev.
  word             FH_SH         0.03    
- participant_id   FH_SH:pos_neg 0.03    
- participant_id.1 FA_FH         0.14    
- participant_id.2 FH_SH         0.03    
- participant_id.3 (Intercept)   0.15    
- Residual                       0.28    </code></pre>
+ participant_id   FA_FH:pos_neg 0.03    
+ participant_id.1 FH_SH:pos_neg 0.02    
+ participant_id.2 FA_FH         0.13    
+ participant_id.3 FH_SH         0.03    
+ participant_id.4 (Intercept)   0.14    
+ Residual                       0.27    </code></pre>
 <p><br><br></p>
 </div>
 <div id="fixation-cross-color" class="section level3">
@@ -2196,14 +2197,14 @@ summary(LMM_scr_cross_red1) # Singular fit
 
 
 # Check PCA of random-effects variance-covariance estimates
-summary(rePCA(LMM_scr_cross_red1)) # For participant there is one term that does not explain variance (&lt; 0.5%)
+summary(rePCA(LMM_scr_cross_red1)) # For participant there is are terms that do not explain variance (&lt; 0.5%)
 
 
 # Check which random effect explains near zero variance
-print(VarCorr(LMM_scr_cross_red1), comp = &quot;Variance&quot;) # It is FA_FH:red_white for participant</code></pre>
-<pre class="r"><code>#### 3) Run final model without random terms explaining zero variance (i.e., remove FA_FH:red_white for participant)
+print(VarCorr(LMM_scr_cross_red1), comp = &quot;Variance&quot;) </code></pre>
+<pre class="r"><code>#### 3) Run final model without random terms explaining zero variance 
 LMM_scr_cross_final &lt;- lmer(iscr_gng_resp_sqrt ~ FH_SH + FA_FH + red_white + FH_SH:red_white + FA_FH:red_white  + 
-  (1 + FH_SH + FA_FH + red_white + FH_SH:red_white || participant_id), 
+  (1 + FH_SH + FA_FH + red_white || participant_id), 
 data = single_trial_data_scr, 
 REML = TRUE, 
 control = lmerControl(optimizer=&quot;bobyqa&quot;)
@@ -2264,10 +2265,10 @@ Intercept
 0.42
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.36 – 0.47
+0.37 – 0.47
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-15.05
+15.52
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
@@ -2284,10 +2285,10 @@ FH_SH
 -0.01 – 0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-1.40
+1.29
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.171
+0.205
 </td>
 </tr>
 <tr>
@@ -2295,16 +2296,16 @@ FH_SH
 FA_FH
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.11
+0.10
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.05 – 0.16
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3.73
+3.89
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>0.001</strong>
+<strong>&lt;0.001
 </td>
 </tr>
 <tr>
@@ -2318,10 +2319,10 @@ red_white
 -0.04 – 0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--1.70
+-1.91
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.097
+0.063
 </td>
 </tr>
 <tr>
@@ -2329,16 +2330,16 @@ red_white
 FH_SH:red_white
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.00
+0.00
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.04 – 0.04
+-0.03 – 0.03
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.03
+0.24
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.975
+0.813
 </td>
 </tr>
 <tr>
@@ -2349,13 +2350,13 @@ FA_FH:red_white
 0.01
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.04 – 0.06
+-0.04 – 0.05
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.38
+0.39
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.707
+0.697
 </td>
 </tr>
 <tr>
@@ -2368,13 +2369,12 @@ Observations
 </tr>
 </table>
 <pre><code>[1] &quot;Random effects:&quot;
- Groups           Name            Std.Dev.
- participant_id   (Intercept)     0.15    
- participant_id.1 FH_SH           0.02    
- participant_id.2 FA_FH           0.14    
- participant_id.3 red_white       0.04    
- participant_id.4 FH_SH:red_white 0.07    
- Residual                         0.28    </code></pre>
+ Groups           Name        Std.Dev.
+ participant_id   (Intercept) 0.15    
+ participant_id.1 FH_SH       0.03    
+ participant_id.2 FA_FH       0.13    
+ participant_id.3 red_white   0.04    
+ Residual                     0.27    </code></pre>
 <p>SCR in trials beginning with a red compared to those with a white fixation cross did not differ significantly. <br><br><br></p>
 </div>
 </div>
@@ -2408,30 +2408,29 @@ other attached packages:
 [13] dplyr_0.8.3      
 
 loaded via a namespace (and not attached):
- [1] httr_1.4.1          tidyr_1.0.0         viridisLite_0.3.0  
- [4] splines_3.6.1       modelr_0.1.5        assertthat_0.2.1   
- [7] highr_0.8           renv_0.12.0         yaml_2.2.0         
-[10] bayestestR_0.7.2    numDeriv_2016.8-1.1 pillar_1.4.6       
-[13] backports_1.1.5     lattice_0.20-38     glue_1.3.1         
-[16] digest_0.6.22       RColorBrewer_1.1-2  rvest_0.3.6        
-[19] minqa_1.2.4         colorspace_1.4-1    htmltools_0.4.0    
-[22] pkgconfig_2.0.3     broom_0.5.2         haven_2.2.0        
-[25] purrr_0.3.3         xtable_1.8-4        mvtnorm_1.0-11     
-[28] scales_1.1.0        webshot_0.5.1       emmeans_1.4.2      
-[31] tibble_3.0.4        generics_0.0.2      farver_2.0.1       
-[34] sjlabelled_1.1.3    ellipsis_0.3.0      withr_2.1.2        
-[37] magrittr_1.5        crayon_1.3.4        effectsize_0.3.2   
-[40] estimability_1.3    evaluate_0.14       nlme_3.1-140       
-[43] forcats_0.4.0       xml2_1.2.2          tools_3.6.1        
-[46] hms_0.5.2           lifecycle_0.2.0     stringr_1.4.0      
-[49] munsell_0.5.0       ggeffects_0.15.1    compiler_3.6.1     
-[52] rlang_0.4.8         grid_3.6.1          nloptr_1.2.1       
-[55] parameters_0.8.2    rstudioapi_0.10     labeling_0.3       
-[58] rmarkdown_1.16      boot_1.3-22         gtable_0.3.0       
-[61] codetools_0.2-16    sjstats_0.17.8      sjmisc_2.8.2       
-[64] R6_2.4.1            performance_0.4.3   insight_0.9.0      
-[67] readr_1.3.1         stringi_1.4.3       Rcpp_1.0.5         
-[70] vctrs_0.3.4         tidyselect_0.2.5    xfun_0.16          </code></pre>
+ [1] Rcpp_1.0.5          mvtnorm_1.0-11      lattice_0.20-38    
+ [4] tidyr_1.0.0         assertthat_0.2.1    digest_0.6.22      
+ [7] R6_2.4.1            backports_1.1.5     evaluate_0.14      
+[10] highr_0.8           httr_1.4.1          pillar_1.4.6       
+[13] rlang_0.4.8         rstudioapi_0.10     minqa_1.2.4        
+[16] performance_0.4.3   nloptr_1.2.1        effectsize_0.3.2   
+[19] rmarkdown_1.16      ggeffects_0.15.1    splines_3.6.1      
+[22] webshot_0.5.1       readr_1.3.1         stringr_1.4.0      
+[25] munsell_0.5.0       broom_0.5.2         compiler_3.6.1     
+[28] numDeriv_2016.8-1.1 modelr_0.1.5        xfun_0.16          
+[31] pkgconfig_2.0.3     parameters_0.8.2    htmltools_0.4.0    
+[34] insight_0.9.0       tidyselect_0.2.5    tibble_3.0.4       
+[37] viridisLite_0.3.0   crayon_1.3.4        withr_2.1.2        
+[40] sjmisc_2.8.2        grid_3.6.1          nlme_3.1-140       
+[43] xtable_1.8-4        gtable_0.3.0        lifecycle_0.2.0    
+[46] magrittr_1.5        bayestestR_0.7.2    scales_1.1.0       
+[49] estimability_1.3    stringi_1.4.3       farver_2.0.1       
+[52] renv_0.12.0         xml2_1.2.2          ellipsis_0.3.0     
+[55] vctrs_0.3.4         generics_0.0.2      boot_1.3-22        
+[58] sjlabelled_1.1.3    tools_3.6.1         forcats_0.4.0      
+[61] glue_1.3.1          purrr_0.3.3         sjstats_0.17.8     
+[64] hms_0.5.2           emmeans_1.4.2       yaml_2.2.0         
+[67] colorspace_1.4-1    rvest_0.3.6         haven_2.2.0        </code></pre>
 </div>
 
 
